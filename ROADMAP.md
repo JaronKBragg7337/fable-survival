@@ -63,6 +63,9 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - [ ] Research pass: what's new in browser gaming (WebGPU, Three.js releases,
       mobile browser changes) — append dated findings to Research Notes (monthly)
 - [ ] Playtest report: play 5 minutes on phone, note friction, file items here
+- [ ] ⚠️ BEFORE 2026-09-30: the GITHUB_TOKEN for the feedback pipeline expires.
+      Owner must generate a new fine-grained PAT (fable-survival only, Issues R/W)
+      and update the Vercel env var, then redeploy. Feedback silently stops if missed.
 
 ## Icebox (ideas, unprioritized)
 
