@@ -22,7 +22,8 @@ That link must never break. This is the project's prime directive.
 ## Session protocol
 
 **On session start:**
-1. Read this file, then HANDOFF.md (latest entry = current state), then ROADMAP.md.
+1. Read this file, then HANDOFF.md (latest entry = current state), then VISION.md,
+   ARCHITECTURE.md, and ROADMAP.md. (Non-Claude agents: AGENTS.md points here.)
 2. Run `git log --oneline -10` to see recent work.
 3. If the working tree is dirty, figure out why before proceeding (check HANDOFF.md).
 
