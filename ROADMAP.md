@@ -19,7 +19,13 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - [ ] Hit feedback: screen flash on damage, particle burst on chop/mine (pooled)
 - [ ] Shadows: single low-res shadow map from the sun, measure FPS on phone first
 - [ ] Ambient audio + SFX (chop, hit, zombie groan, night crickets) — small
-      generated/CC0 sounds, Web Audio API, mute button
+      generated/CC0 sounds, Web Audio API, mute button. Prioritize zombie
+      approach cues (player feedback: deaths feel sudden)
+- [ ] Difficulty tuning: Day-1 grace period near spawn (fewer/slower zombies),
+      and/or an Easy/Normal toggle on the start screen (player feedback: Kurtis
+      died repeatedly — engaging but near the frustration line)
+- [ ] Damage telegraphing: zombie wind-up animation + screen-edge red vignette
+      when one is close behind you
 
 ## Milestone 2 — Bigger World
 

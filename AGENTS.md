@@ -10,7 +10,9 @@ Read in this order before doing anything:
 2. **HANDOFF.md** — session log; the top entry is the current state
 3. **VISION.md** — what this game is trying to become (don't drift from it)
 4. **ARCHITECTURE.md** — why things are built this way (don't "improve" these away)
-5. **ROADMAP.md** — the backlog; take the top unchecked item of the current milestone
+5. **PLAYER_FEEDBACK.md** — what real players experienced (patterns here outrank
+   assumptions; follow its privacy rules strictly — testers are mostly kids)
+6. **ROADMAP.md** — the backlog; take the top unchecked item of the current milestone
 
 Non-negotiables, whoever you are:
 
