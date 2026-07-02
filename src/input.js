@@ -37,6 +37,8 @@ export class InputManager {
   // ---------- Desktop ----------
   _initKeyboard() {
     window.addEventListener('keydown', e => {
+      // never treat typing in a form field (feedback panel etc.) as game input
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
       if (e.repeat) return;
       this.keys.add(e.code);
       if (e.code === 'KeyE') this.emit('interact');

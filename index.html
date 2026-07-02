@@ -71,6 +71,10 @@
     .traderow button { background: #34623f; color: #fff; border: none; border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer; }
     .traderow button.sellb { background: #6b4b2a; }
     .traderow button:disabled { opacity: .35; }
+    .panel input[type="text"], .panel textarea { width: 100%; background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.2); border-radius: 8px; color: #fff; padding: 8px;
+      font-size: 13px; margin-bottom: 8px; font-family: inherit; resize: none; }
+    .panel input::placeholder, .panel textarea::placeholder { color: rgba(255,255,255,.4); }
 
     /* ---------- Death / start screens ---------- */
     .fullscreen-msg { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 100; display: none;
@@ -109,6 +113,7 @@
     <button class="mbtn" id="mb-build">🔨</button>
     <button class="mbtn" id="mb-cam">👁</button>
     <button class="mbtn" id="mb-save">💾</button>
+    <button class="mbtn" id="mb-fb">💬</button>
   </div>
 
   <!-- Panels: filled in by src/ui.js -->
@@ -116,6 +121,7 @@
   <div class="panel" id="build-panel"></div>
   <div class="panel" id="trader-panel"></div>
   <div class="panel" id="vehicle-panel"></div>
+  <div class="panel" id="fb-panel"></div>
 
   <!-- Screens -->
   <div class="fullscreen-msg" id="death-screen">

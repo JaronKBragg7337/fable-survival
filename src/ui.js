@@ -8,6 +8,9 @@ import { ITEMS } from './items.js';
 import { PIECES } from './building.js';
 import { TRADER_STOCK } from './trader.js';
 
+// bump when shipping notable changes; included in feedback reports
+export const GAME_VERSION = '0.2.0';
+
 export class UI {
   constructor(game) {
     this.game = game;
@@ -27,6 +30,7 @@ export class UI {
     this.$('mb-build').addEventListener('click', () => this.togglePanel('build'));
     this.$('mb-cam').addEventListener('click', () => game.camCtl.toggleMode());
     this.$('mb-save').addEventListener('click', () => game.save.save());
+    this.$('mb-fb').addEventListener('click', () => this.openFeedback());
 
     // start screen
     this.$('start-help').textContent = game.input.isTouch
@@ -53,7 +57,7 @@ export class UI {
 
   // ---------- generic panel helpers ----------
   closeAll() {
-    for (const id of ['inv-panel', 'build-panel', 'trader-panel', 'vehicle-panel']) this.$(id).style.display = 'none';
+    for (const id of ['inv-panel', 'build-panel', 'trader-panel', 'vehicle-panel', 'fb-panel']) this.$(id).style.display = 'none';
     this._open = null;
     this.activeStorage = null;
   }
@@ -235,6 +239,71 @@ export class UI {
     p.innerHTML = html;
     this._wireClose(p);
     p.querySelectorAll('[data-part]').forEach(el => el.addEventListener('click', () => this.game.vehicles.install(v, el.dataset.part)));
+  }
+
+  // ---------- feedback (goes to GitHub issues via /api/feedback) ----------
+  openFeedback() {
+    this._open = 'fb';
+    this._show('fb');
+    const p = this.$('fb-panel');
+    const savedHandle = (localStorage.getItem('fable_fb_handle') || '').replace(/"/g, '&quot;');
+    p.innerHTML = this._panelHeader('💬 Message the Dev Team')
+      + `<div style="font-size:11px;opacity:.75;margin-bottom:8px">Found a bug? Got an idea? It goes straight to the devs.
+         <b>Use a made-up nickname — not your real name.</b></div>`
+      + `<input type="text" id="fb-handle" maxlength="24" placeholder="Your nickname (made-up!)" value="${savedHandle}">`
+      + `<select id="fb-cat" style="width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;padding:8px;font-size:13px;margin-bottom:8px">
+           <option value="Bug">🐛 Bug — something broke</option>
+           <option value="Idea">💡 Idea — add this!</option>
+           <option value="Balance">⚖️ Balance — too hard / too easy</option>
+           <option value="Controls">🎮 Controls</option>
+           <option value="Graphics">🎨 Graphics / looks</option>
+           <option value="Other">💬 Other</option>
+         </select>`
+      + `<textarea id="fb-msg" maxlength="500" rows="4" placeholder="What happened? What would make the game better?"></textarea>`
+      + `<input type="text" id="fb-web" style="display:none" tabindex="-1" autocomplete="off">`
+      + `<div class="rowbtns"><button id="fb-send">Send 📨</button></div>`
+      + `<div id="fb-status" style="font-size:11px;margin-top:6px;text-align:center;opacity:.85"></div>`;
+    this._wireClose(p);
+    p.querySelector('#fb-send').addEventListener('click', () => this._sendFeedback());
+  }
+
+  async _sendFeedback() {
+    const status = this.$('fb-status');
+    const last = +localStorage.getItem('fable_fb_last') || 0;
+    if (Date.now() - last < 60000) { status.textContent = 'Please wait a minute between messages.'; return; }
+    const handle = this.$('fb-handle').value.trim();
+    const message = this.$('fb-msg').value.trim();
+    if (message.length < 3) { status.textContent = 'Write a little more first :)'; return; }
+    localStorage.setItem('fable_fb_handle', handle);
+    status.textContent = 'Sending…';
+    try {
+      // context that helps debugging, with nothing personal in it
+      const g = this.game;
+      const meta = {
+        version: GAME_VERSION,
+        device: (this.game.input.isTouch ? 'touch ' : 'desktop ') + `${screen.width}x${screen.height}`,
+        ua: navigator.userAgent.slice(0, 80),
+        pos: `${Math.round(g.player.pos.x)},${Math.round(g.player.pos.z)}`,
+        day: g.dayNight.clockText()
+      };
+      const r = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ handle, message, category: this.$('fb-cat').value, meta, website: this.$('fb-web').value })
+      });
+      if (r.ok) {
+        localStorage.setItem('fable_fb_last', String(Date.now()));
+        status.textContent = '✅ Sent! The dev team will see it. Thanks!';
+        this.$('fb-msg').value = '';
+      } else {
+        const d = await r.json().catch(() => ({}));
+        status.textContent = d.error === 'not-configured'
+          ? 'Feedback inbox is not hooked up yet — tell the dev in person!'
+          : 'Could not send — try again later.';
+      }
+    } catch {
+      status.textContent = 'No connection — try again later.';
+    }
   }
 
   // ---------- HUD ----------

@@ -2,6 +2,17 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.2.0 — 2026-07-02
+
+- In-game feedback button (💬): nickname (made-up names enforced by copy),
+  category picker, 500-char message → creates a GitHub issue labeled
+  `player-feedback` via new `/api/feedback` Vercel serverless function
+- Reports auto-include game version, device type/screen, player position, and
+  in-game time — no personal data
+- Spam guards: honeypot field, 60s client cooldown, length caps
+- Typing in form fields no longer triggers game controls (input.js guard)
+- Deploys now go from project root (vercel.json added) so api/ ships with the game
+
 ## v0.1.0-foundation — 2026-07-02
 
 Initial playable release, live at https://fable-survival.vercel.app

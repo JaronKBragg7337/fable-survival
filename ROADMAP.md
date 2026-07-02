@@ -56,6 +56,8 @@ must not break the live link. See CLAUDE.md for the full protocol.
 
 ## Recurring / maintenance (good for scheduled tasks)
 
+- [ ] Triage `player-feedback` GitHub issues → PLAYER_FEEDBACK.md + roadmap items,
+      close with comment (every session — see CLAUDE.md protocol)
 - [ ] Check live URL loads with zero console errors (weekly)
 - [ ] `npm outdated` — bump Three.js/Vite minor versions, build, verify (monthly)
 - [ ] Research pass: what's new in browser gaming (WebGPU, Three.js releases,
@@ -70,6 +72,9 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - Base raids: zombies attack your walls at night
 - Gamepad support (desktop)
 - PWA manifest so it installs to home screen with an icon
+- "Ask the Dev Team" v2: feedback endpoint checks for duplicates/planned items
+  and replies in-game ("already planned for Milestone 3!") — needs a small
+  AI/API call in the serverless function; research cost first
 
 ## Research Notes
 

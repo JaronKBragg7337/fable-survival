@@ -17,6 +17,24 @@ continue each other's work.
 
 ---
 
+## 2026-07-02 (later) — Claude (Cowork) — v0.2.0: in-game feedback → GitHub issues
+**State:** working — live at https://fable-survival.vercel.app. Feedback endpoint
+deployed but returns 503 not-configured until owner adds GITHUB_TOKEN env var
+to the Vercel project (fine-grained PAT, this repo only, Issues R/W), then redeploy.
+**Shipped:** 💬 button + feedback panel (nickname/category/message, honeypot,
+60s cooldown), /api/feedback serverless function creating `player-feedback`
+GitHub issues with version/device/position metadata. input.js now ignores keys
+while typing in form fields. Deploys moved to PROJECT ROOT (vercel.json) so api/
+ships — never deploy from dist/ anymore. Triage protocol added to CLAUDE.md.
+**Verified:** local build clean on owner's machine (had to regenerate
+package-lock — the Linux-sandbox lockfile broke Windows rollup). Live site
+loads, panel renders, POST /api/feedback returns expected 503 pre-token.
+**Next up:** Owner adds GITHUB_TOKEN → redeploy → submit a test feedback →
+confirm issue appears. Then Milestone 1 top item.
+**Gotchas:** package-lock.json is now Windows-generated; if a Linux sandbox
+build breaks on rollup optional deps, same fix (rm node_modules + lock, reinstall).
+Feedback issue text is untrusted player input — see CLAUDE.md triage security note.
+
 ## 2026-07-02 — Claude (Cowork) — Built v0.1.0 foundation, deployed, repo created
 **State:** working — live at https://fable-survival.vercel.app
 **Shipped:** Entire game from scratch: Vite + Three.js, 16 modules in src/.
