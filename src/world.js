@@ -35,6 +35,7 @@ export class World {
     this._buildSafeZone();
     this._buildHouses();
     this._scatter();
+    this._buildStructures(); // after _scatter so tree/rock layout stays identical
   }
 
   isInSafeZone(x, z) { return Math.hypot(x, z) < SAFE_R; }
@@ -296,6 +297,99 @@ export class World {
     );
     this._crate(x - 2, z - 1.5);
     this._crate(x + 2, z + 0.5, true);
+  }
+
+  // ----- Landmark structures -----
+  // Places that make the map feel like a world: somewhere to loot, hide, and
+  // discover. Same recipe as _house(): build a Group, push AXIS-ALIGNED box
+  // colliders (or small circles for posts), drop crates, and register a
+  // lootArea so the spot has stakes (enemies spawn near it too). Keep every
+  // structure unrotated — box colliders assume no rotation (see _house note).
+  // To add another: write a _thing(x,z) that returns {x,z} and list it here.
+  _buildStructures() {
+    const built = [
+      this._gasStation(11, 56),
+      this._barn(-62, -20),
+      this._watchtower(64, 26)
+    ];
+    for (const p of built) this.lootAreas.push(p);
+  }
+
+  // Roadside gas station: shop box + forecourt canopy on pillars + 2 pumps.
+  _gasStation(x, z) {
+    const s = this.game.scene, g = new THREE.Group();
+    const wall = this._mat(0xb7b3a6), roofMat = this._mat(0x8a2f2f), steel = this._mat(0x55636b);
+    const shop = new THREE.Mesh(new THREE.BoxGeometry(5, 2.8, 4), wall); shop.position.set(0, 1.4, 0);
+    const shopRoof = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.25, 4.4), roofMat); shopRoof.position.y = 2.9;
+    const win = new THREE.Mesh(new THREE.BoxGeometry(5.02, 0.9, 0.06), this._mat(0x2b3a44)); win.position.set(0, 1.4, 2.03);
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(6, 0.3, 4.4), steel); canopy.position.set(0, 3.3, 5.2);
+    const pillarGeo = new THREE.CylinderGeometry(0.22, 0.22, 3.3, 6);
+    const pA = new THREE.Mesh(pillarGeo, steel); pA.position.set(-2.4, 1.65, 5.2);
+    const pB = new THREE.Mesh(pillarGeo, steel); pB.position.set(2.4, 1.65, 5.2);
+    const pumpGeo = new THREE.BoxGeometry(0.7, 1.2, 0.7);
+    const pump1 = new THREE.Mesh(pumpGeo, this._mat(0xcf5030)); pump1.position.set(-1.2, 0.6, 5.2);
+    const pump2 = pump1.clone(); pump2.position.x = 1.2;
+    g.add(shop, shopRoof, win, canopy, pA, pB, pump1, pump2);
+    g.position.set(x, 0, z); s.add(g);
+    this.game.colliders.push({ box: true, x, z, hx: 2.5, hz: 2 });
+    for (const [lx, lz, r] of [[-2.4, 5.2, 0.3], [2.4, 5.2, 0.3], [-1.2, 5.2, 0.45], [1.2, 5.2, 0.45]])
+      this.game.colliders.push({ x: x + lx, z: z + lz, r });
+    this._crate(x + 3.3, z - 1);
+    this._crate(x, z + 3.2, true);
+    return { x, z };
+  }
+
+  // Big enterable barn: slab + 3 walls + a front doorway + a peaked roof.
+  _barn(x, z) {
+    const s = this.game.scene, g = new THREE.Group();
+    const wall = this._mat(0x8a3b2f), slabMat = this._mat(0x6e6e6e), roofMat = this._mat(0x412018);
+    const slab = new THREE.Mesh(new THREE.BoxGeometry(10, 0.2, 7), slabMat); slab.position.y = 0.1;
+    const back = new THREE.Mesh(new THREE.BoxGeometry(10, 3.4, 0.3), wall); back.position.set(0, 1.7, -3.35);
+    const left = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.4, 7), wall); left.position.set(-4.85, 1.7, 0);
+    const right = left.clone(); right.position.x = 4.85;
+    const frontL = new THREE.Mesh(new THREE.BoxGeometry(3.3, 3.4, 0.3), wall); frontL.position.set(-3.35, 1.7, 3.35);
+    const frontR = frontL.clone(); frontR.position.x = 3.35;
+    const roofL = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.25, 4.4), roofMat); roofL.position.set(0, 4.05, -1.75); roofL.rotation.x = 0.5;
+    const roofR = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.25, 4.4), roofMat); roofR.position.set(0, 4.05, 1.75); roofR.rotation.x = -0.5;
+    g.add(slab, back, left, right, frontL, frontR, roofL, roofR);
+    g.position.set(x, 0, z); s.add(g);
+    this.game.colliders.push(
+      { box: true, x, z: z - 3.35, hx: 5, hz: 0.3 },
+      { box: true, x: x - 4.85, z, hx: 0.3, hz: 3.5 },
+      { box: true, x: x + 4.85, z, hx: 0.3, hz: 3.5 },
+      { box: true, x: x - 3.35, z: z + 3.35, hx: 1.65, hz: 0.3 },
+      { box: true, x: x + 3.35, z: z + 3.35, hx: 1.65, hz: 0.3 }
+    );
+    this._crate(x - 3, z - 2);
+    this._crate(x + 3, z - 1.5, true);
+    return { x, z };
+  }
+
+  // Lookout tower: 4 legs, railed platform, capped roof. Loot crate at its
+  // base. Climbing it is a future expansion (would need a ladder trigger).
+  _watchtower(x, z) {
+    const s = this.game.scene, g = new THREE.Group();
+    const wood = this._mat(0x6b4a2c), plat = this._mat(0x836142), roofMat = this._mat(0x4a2f26);
+    const legGeo = new THREE.CylinderGeometry(0.16, 0.18, 4.4, 6);
+    const legs = [[-1.4, -1.4], [1.4, -1.4], [-1.4, 1.4], [1.4, 1.4]];
+    for (const [lx, lz] of legs) {
+      const leg = new THREE.Mesh(legGeo, wood); leg.position.set(lx, 2.2, lz); g.add(leg);
+      this.game.colliders.push({ x: x + lx, z: z + lz, r: 0.28 });
+    }
+    const platform = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.25, 3.4), plat); platform.position.y = 4.4;
+    const railNS = new THREE.BoxGeometry(3.4, 0.5, 0.12);
+    const rN = new THREE.Mesh(railNS, wood); rN.position.set(0, 4.8, -1.64);
+    const rS = rN.clone(); rS.position.z = 1.64;
+    const railEW = new THREE.BoxGeometry(0.12, 0.5, 3.4);
+    const rE = new THREE.Mesh(railEW, wood); rE.position.set(1.64, 4.8, 0);
+    const rW = rE.clone(); rW.position.x = -1.64;
+    const postGeo = new THREE.CylinderGeometry(0.1, 0.1, 1.3, 5);
+    for (const [lx, lz] of legs) { const p = new THREE.Mesh(postGeo, wood); p.position.set(lx * 0.85, 5.3, lz * 0.85); g.add(p); }
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(2.9, 1.1, 4), roofMat); roof.position.y = 6.5; roof.rotation.y = Math.PI / 4;
+    g.add(platform, rN, rS, rE, rW, roof);
+    g.position.set(x, 0, z); s.add(g);
+    this._crate(x, z + 2.6);
+    return { x, z };
   }
 
   // Called by Player.attack() - chop/mine the node you're facing.

@@ -21,13 +21,11 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - [ ] Ambient audio + SFX (chop, hit, zombie groan, night crickets) — small
       generated/CC0 sounds, Web Audio API, mute button. Prioritize zombie
       approach cues (player feedback: deaths feel sudden)
-- [ ] Difficulty tuning: Day-1 grace period near spawn (fewer/slower zombies),
-      and/or an Easy/Normal toggle on the start screen (player feedback: Kurtis
-      died repeatedly — engaging but near the frustration line)
-      - 2026-07-03: shipped the low-risk half of #15 first — a start-screen
-        night-danger warning + rotating survival tips on the death screen so
-        deaths teach. Still open: actual balance changes (grace period /
-        Easy-Normal toggle) and damage telegraphing below.
+- [x] Difficulty tuning — OWNER DECISION 2026-07-03: **"Teach, don't nerf. Let
+      players learn."** No grace period, no Easy/Normal toggle. Shipped the
+      teaching path instead: start-screen night-danger warning + rotating
+      survival tips on death (#15). Danger stays; players learn it. Do NOT add
+      difficulty toggles/grace periods unless the owner reverses this.
 - [ ] Damage telegraphing: zombie wind-up animation + screen-edge red vignette
       when one is close behind you
 
@@ -35,8 +33,9 @@ must not break the live link. See CLAUDE.md for the full protocol.
 
 - [ ] Grow map to 400×400: raise halfSize, add biome zones (dense forest, field,
       lakeside), keep fog distance so draw calls stay flat
-- [ ] New structures: gas station, barn, watchtower, small village cluster
-      (follow world.js _house() pattern; keep axis-aligned or add rotated AABBs)
+- [x] New structures: gas station, barn (enterable), watchtower — each with
+      loot + a zombie spawn area (world.js `_buildStructures`). Small village
+      cluster still open as a future add.
 - [ ] A lake/pond: drink water at the shore (thirst refill), visual only otherwise
 - [ ] More loot variety: backpack (raises inventory size), matches, cooked meat
 - [ ] Chunked world update: skip updating far-away nodes/crates (perf headroom
@@ -50,6 +49,10 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - [ ] Cooking on campfires: raw→cooked food, better hunger restore
 - [ ] Zombie variety: fast crawler, tanky brute (same pool, different stats/mesh)
 - [ ] Dropped items appear on the ground as pickups (currently they vanish)
+      - OWNER PRIORITY 2026-07-03 (#16): structures first (DONE) → **dropped
+        loot next** → then general pickups. Zombie loot / dropped-item drops
+        should land on the ground and be walk-over/USE pickups (pool the
+        ground-item meshes like enemies).
 
 ## Milestone 4 — Multiplayer-ish & Meta (research first, then decide)
 
