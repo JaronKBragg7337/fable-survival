@@ -31,7 +31,9 @@ passed (132.78 KB gzip JS, under budget). Local Chrome/Playwright Pixel 5 QA:
 zero console/page/4xx events, entered world, touch controls visible, tapped HIT
 near a deterministic tree and gained wood, moved with joystick, opened inventory
 and saw wood. Visual screenshots inspected for road z-fighting, mobile overlap,
-and ground patch readability.
+and ground patch readability. After push, production served the new bundle and
+live Pixel 5 QA repeated the chop/move/inventory flow with zero console/page/4xx
+events.
 **Next up:** Milestone 1 next item: better trees with 2-3 variants, still
 instanced.
 **Gotchas:** Google Drive checkout still corrupts generated `node_modules`;
