@@ -17,6 +17,29 @@ continue each other's work.
 
 ---
 
+## 2026-07-03 — Claude (claude-code) — Tech-debt #9: stable vehicle ids
+**State:** working — serialization-only change, live game untouched.
+**Shipped:** `src/vehicles.js` — each wreck now has a stable string `id`
+(`wreck_a`, `wreck_b`). `toJSON` emits `{id, installed, repaired}`; `fromJSON`
+matches saved entries by `id` and falls back to positional index for old
+saves with no id (crash-proof, per CLAUDE.md save-compat contract). Removes a
+latent hazard flagged in MULTIPLAYER_DESIGN.md §4.3 and is a prerequisite for
+cross-device cloud saves. Not deployed to production by this branch (work is on
+`claude/game-maintenance-session-39zw54` for PR review). CHANGELOG bumped to
+v0.3.1; feedback metadata version left at v0.3.0 (unchanged).
+**Verified:** clean `npm run build` before and after (132.83 KB gzip, under
+budget). Wrote a standalone node test covering old-save (index fallback),
+new-save (id match), reordered entries (correct car by id), stale/removed id,
+and malformed entries — all pass. Headless mobile Playwright (393×851) boot of
+`vite preview`: one canvas, zero console errors, zero 4xx.
+**Next up:** Milestone 1 next item — better trees (2–3 instanced variants). Or
+issue #15 (early-player survival tuning) / #14 (AI-workflow doc), both unblocked.
+The Supabase cloud-save chain (#5–#8) is blocked on the owner's account-model
+decision in #12.
+**Gotchas:** Playwright is not a project dep; use the global at
+`/opt/node22/lib/node_modules/playwright` (require it by absolute path from a
+`.cjs` file). Preview server runs on any free port via `vite preview`.
+
 ## 2026-07-03 — Codex — Milestone 1 ground variety shipped
 **State:** working — live game remains mobile-first and production deploy is
 expected via `git push` to `main`.

@@ -15,12 +15,14 @@ export class Vehicles {
   constructor(game) {
     this.game = game;
     this.list = [];
-    // wrecks parked just off the roads
-    this._wreck(9, 38, 0.3);
-    this._wreck(-44, -8, 1.8);
+    // wrecks parked just off the roads. Each gets a STABLE string id so save
+    // data attaches to the right car even if wrecks are added/reordered later
+    // (see MULTIPLAYER_DESIGN.md §4.3). Never renumber an existing id.
+    this._wreck('wreck_a', 9, 38, 0.3);
+    this._wreck('wreck_b', -44, -8, 1.8);
   }
 
-  _wreck(x, z, rotY) {
+  _wreck(id, x, z, rotY) {
     const mat = c => new THREE.MeshLambertMaterial({ color: c });
     const g = new THREE.Group();
     const body = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.9, 1.7), mat(0x8a4a3a)); body.position.y = 0.75;
@@ -43,7 +45,7 @@ export class Vehicles {
     this.game.scene.add(g);
     this.game.colliders.push({ box: true, x, z, hx: 1.9, hz: 1.4 });
 
-    const v = { x, z, mesh: g, bodyMat: body.material, wheels, installed: { fuel: 0, battery: 0, wheel: 0 }, repaired: false };
+    const v = { id, x, z, mesh: g, bodyMat: body.material, wheels, installed: { fuel: 0, battery: 0, wheel: 0 }, repaired: false };
     this.list.push(v);
     this.game.interactables.push({
       x, z, r: 2.8,
@@ -79,12 +81,16 @@ export class Vehicles {
     if (v.repaired) v.bodyMat.color.setHex(0x3a6a8a);
   }
 
-  toJSON() { return this.list.map(v => ({ installed: v.installed, repaired: v.repaired })); }
+  toJSON() { return this.list.map(v => ({ id: v.id, installed: v.installed, repaired: v.repaired })); }
   fromJSON(data) {
     if (!Array.isArray(data)) return;
+    // Match saved entries to wrecks by stable id. Old saves have no id, so we
+    // fall back to positional index for them (keeps the load path crash-proof
+    // per CLAUDE.md save-compat contract).
     data.forEach((d, i) => {
-      const v = this.list[i];
-      if (!v || !d) return;
+      if (!d) return;
+      const v = (d.id && this.list.find(w => w.id === d.id)) || this.list[i];
+      if (!v) return;
       v.installed = { fuel: 0, battery: 0, wheel: 0, ...d.installed };
       v.repaired = !!d.repaired;
       this._applyVisual(v);

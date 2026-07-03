@@ -2,6 +2,14 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.3.1 — 2026-07-03
+
+- Vehicles now carry stable string ids (`wreck_a`, `wreck_b`) and saves store
+  repair progress keyed by id instead of array index (tech-debt #9). Old saves
+  still load via positional fallback, so adding or reordering wrecks in the
+  future no longer risks attaching repair progress to the wrong car. No
+  gameplay or save-format break.
+
 ## v0.3.0 — 2026-07-03
 
 - Added procedural vertex-colored ground variety: grass, darker grass, dry
