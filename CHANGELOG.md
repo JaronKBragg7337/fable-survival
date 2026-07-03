@@ -2,6 +2,15 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.3.2 — 2026-07-03
+
+- Survival guidance so early deaths teach instead of feeling random (#15): the
+  start screen now warns that zombies get faster and see farther at night and
+  that the fenced plaza is safe, and the death screen shows a rotating,
+  mechanically-accurate survival tip (night danger, safe zone, bandages,
+  food/water drain, healing threshold, quick walls). Text-only — no change to
+  zombie AI, balance, or night danger.
+
 ## v0.3.1 — 2026-07-03
 
 - Vehicles now carry stable string ids (`wreck_a`, `wreck_b`) and saves store

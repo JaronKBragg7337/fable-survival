@@ -11,6 +11,17 @@ import { TRADER_STOCK } from './trader.js';
 // bump when shipping notable changes; included in feedback reports
 export const GAME_VERSION = '0.3.0';
 
+// Short survival tips shown on death so a loss teaches something (issue #15).
+// Keep every line factually true to the mechanics — players learn from these.
+const DEATH_TIPS = [
+  '🧟 At night zombies move faster and see you from 18m (12m by day). Be behind walls or in the plaza before dark.',
+  '🏰 The fenced plaza is a true safe zone — zombies can’t follow you in. Run there when you’re low.',
+  '🩹 A bandage restores 25 HP. Buy them from the trader or loot downed infected — carry a spare.',
+  '🥫 Canned food and 🧴 water stop the starve/thirst drain (2 HP/s at empty). Top up before either hits zero.',
+  '❤️ You only heal when hunger and thirst are both above 60. Stay fed and hydrated to regenerate.',
+  '🔨 A wall, a wall, and a door make a safe corner anywhere. Gather 🪵 and 🪨 early so you can build before night.',
+];
+
 export class UI {
   constructor(game) {
     this.game = game;
@@ -36,6 +47,9 @@ export class UI {
     this.$('start-help').textContent = game.input.isTouch
       ? 'Left stick: move (push to edge = sprint). Drag right side: look. USE: interact. HIT: attack/chop. Survive, scavenge, build. The fenced plaza is safe.'
       : 'WASD move, Shift sprint, mouse look (click to lock), click attack/chop, E interact, I inventory, B build, V camera, Space jump. The fenced plaza is safe.';
+    // one clear danger cue so first deaths feel learnable, not random (issue #15)
+    this.$('start-tip').textContent =
+      '⚠️ Zombies get faster and spot you from farther at night. Build walls or get back to the fenced plaza before dark — they can’t enter it.';
     this.$('start-btn').addEventListener('click', () => {
       this.$('start-screen').style.display = 'none';
       game.started = true;
@@ -334,6 +348,7 @@ export class UI {
 
   showDeath(reason) {
     this.$('death-reason').textContent = reason;
+    this.$('death-tip').textContent = '💡 ' + DEATH_TIPS[Math.floor(Math.random() * DEATH_TIPS.length)];
     this.$('death-screen').style.display = 'flex';
     this.closeAll();
   }
