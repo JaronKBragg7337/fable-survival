@@ -17,6 +17,37 @@ continue each other's work.
 
 ---
 
+## 2026-07-03 — Claude (claude-code) — #16 explorable structures (gas/barn/tower)
+**State:** working — 3 new landmark structures. Live game safe; existing map
+layout (trees/rocks/houses) unchanged.
+**Shipped:** `src/world.js` — new `_buildStructures()` + `_gasStation`,
+`_barn`, `_watchtower` builders following the `_house()` recipe (Group of
+flat-colored meshes, axis-aligned box colliders + small circle colliders for
+posts, loot crates/barrels, and each registered as a `lootArea` so zombies
+spawn there). Called AFTER `_scatter()` so the seeded tree/rock layout is
+byte-identical to before. Gas station at (11,56), barn (enterable via front
+doorway) at (-62,-20), watchtower at (64,26). GAME_VERSION → 0.4.0, CHANGELOG
+v0.4.0, ROADMAP Milestone-2 structures item checked off. Owner decisions also
+recorded in ROADMAP: #15 "teach don't nerf" (no difficulty toggle), #16 next =
+dropped loot then pickups. On PR #17 branch, not pushed to production.
+**Verified:** `npm run build` green (134.05 KB gzip, under budget). Headless
+Playwright: entered world, all 3 structures present as lootAreas, 153 colliders
+/ 24 interactables registered, zero console errors. Collision probes — player
+dropped inside the solid gas-station shop is ejected to open ground (finite
+coords); barn interior stays walkable. Screenshotted all three facing-on: each
+renders cleanly (no z-fighting/glitches), loot crates present, zombies spawn
+nearby. Used a TEMP `window.game` debug handle for the QA and REMOVED it before
+building/committing (verified absent; bundle hash matches the no-debug build).
+**Next up:** #16 dropped loot (owner's stated next priority) — zombie/drop
+loot lands on the ground as pooled pickups instead of vanishing. Then general
+pickups. Damage telegraphing (#15 list) is also open but lower priority.
+**Gotchas:** MULTIPLAYER_DESIGN.md referenced by issues #5–#12 is NOT in the
+repo (never committed) — flagged to owner. Cloud-save direction decided
+(username + password + recovery code) but backend provisioning (Supabase +
+Vercel env vars) is owner-gated infra + COPPA-sensitive — do not build without
+explicit go-ahead. Structures are unrotated on purpose (box colliders assume
+no rotation).
+
 ## 2026-07-03 — Claude (claude-code) — #15 survival hints (start + death tips)
 **State:** working — text-only UI, no gameplay/AI/balance change. Live game safe.
 **Shipped:** `index.html` gains a `#start-tip` line and a `#death-tip` line

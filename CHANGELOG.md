@@ -2,6 +2,16 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.4.0 — 2026-07-03
+
+- Three explorable landmark structures added to the world (#16): a roadside
+  **gas station** (shop + forecourt canopy + pumps), a large enterable **barn**
+  (walk in through the front doorway to loot/hide), and a **watchtower**
+  lookout you can spot from a distance. Each has its own loot crates/barrels
+  and is a zombie spawn area, so the map now has real places to loot, hide,
+  and discover. All flat-colored low-poly, built after the deterministic
+  scatter so existing tree/rock/house layout is unchanged. Bundle +~1 KB gzip.
+
 ## v0.3.2 — 2026-07-03
 
 - Survival guidance so early deaths teach instead of feeling random (#15): the
