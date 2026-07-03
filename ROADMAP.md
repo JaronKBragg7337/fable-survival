@@ -85,3 +85,9 @@ must not break the live link. See CLAUDE.md for the full protocol.
 
 - 2026-07-02: Foundation built on Three.js 0.160 / Vite 5. Bundle 131 KB gz.
   Known-good baseline: tag v0.1.0-foundation.
+- 2026-07-03: Persistent-multiplayer / cloud-save architecture designed →
+  **MULTIPLAYER_DESIGN.md** (accounts, save schema, base persistence, world/server
+  models, Supabase+Vercel+GitHub option, risks, Phase 1 plan). Recommendation:
+  ship **Phase 1 optional cloud save (Supabase, Model 1 "shared seed")** layered
+  over localStorage before any realtime multiplayer. Issues filed for the next
+  steps. This folds into / supersedes the Milestone 4 "research first" items.

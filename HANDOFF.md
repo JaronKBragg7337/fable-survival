@@ -17,6 +17,32 @@ continue each other's work.
 
 ---
 
+## 2026-07-03 — Claude (Claude Code) — Multiplayer/cloud-save design doc (no code changes)
+**State:** working — no gameplay code touched. Build verified green (132.78 KB gz,
+matches prior handoff). Live game untouched; nothing deployed.
+**Shipped:** New **MULTIPLAYER_DESIGN.md** — the technical design for the future
+path from single-player to accounts → cloud saves → persistent bases → (eventually)
+multiplayer. Covers: exact current save schema (grounded in save.js et al.), a
+privacy-safe account model (player-code first, email deferred for COPPA reasons),
+the cloud save envelope (same JSON in Supabase jsonb, world always seed-derived),
+base/building persistence, three world/server models (shared-seed / authoritative
+session / P2P), the Supabase+Vercel+GitHub architecture, multiplayer risks, and a
+lowest-risk **Phase 1 optional cloud save** plan with verification gates. ROADMAP
+Research Notes updated to point at it. This was a BOOTSTRAP.md run: read all docs,
+verified build (no blocking fix needed → no gameplay changes, per task).
+**Verified:** `npm install && npm run build` clean, 132.78 KB gz (within budget).
+No open `player-feedback` issues (only #3, token rotation). Design grounded in a
+full read of save/stats/inventory/daynight/building/vehicles/world/items/main and
+api/feedback.js.
+**Next up:** Owner decision on Phase 1. If yes: filed issues (cloud-save) — start
+with the Supabase project + accounts/saves schema, then /api functions, then
+src/cloudSave.js. Also low-risk tech-debt: give vehicles stable string ids
+(currently saved by array index — see design §4.3) before cross-device saves ship.
+**Gotchas:** DESIGN ONLY — do not build multiplayer yet; the doc's whole thesis is
+walk-don't-run (cloud save first, realtime last). vehicles.js fromJSON maps saves
+by positional index — a latent cross-device hazard flagged in the doc. Any backend
+work must keep the game fully playable offline with localStorage as source of truth.
+
 ## 2026-07-03 — Codex — Milestone 1 ground variety shipped
 **State:** working — live game remains mobile-first and production deploy is
 expected via `git push` to `main`.
