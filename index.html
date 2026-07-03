@@ -85,6 +85,8 @@
     #start-screen { display: flex; background: linear-gradient(#0a1520, #1a2f22); }
     #start-screen h1 { color: #ffd75e; }
     #start-screen p { font-size: 12px; opacity: .8; max-width: 320px; line-height: 1.6; margin-top: 8px; }
+    #start-tip { color: #ff9a6b; opacity: .95; font-size: 12px; max-width: 320px; line-height: 1.5; margin-top: 10px; }
+    #death-tip { font-size: 12px; opacity: .82; max-width: 320px; line-height: 1.5; margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -127,12 +129,14 @@
   <!-- Screens -->
   <div class="fullscreen-msg" id="death-screen">
     <h1>YOU DIED</h1><div id="death-reason"></div>
+    <div id="death-tip"></div>
     <button id="respawn-btn">Respawn at Safe Zone</button>
   </div>
   <div class="fullscreen-msg" id="start-screen">
     <h1>FABLE SURVIVAL</h1>
     <div style="font-size:13px; opacity:.9">A tiny survival world in your browser</div>
     <p id="start-help"></p>
+    <p id="start-tip"></p>
     <button id="start-btn">Enter World</button>
   </div>
 

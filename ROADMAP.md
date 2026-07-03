@@ -24,6 +24,10 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - [ ] Difficulty tuning: Day-1 grace period near spawn (fewer/slower zombies),
       and/or an Easy/Normal toggle on the start screen (player feedback: Kurtis
       died repeatedly — engaging but near the frustration line)
+      - 2026-07-03: shipped the low-risk half of #15 first — a start-screen
+        night-danger warning + rotating survival tips on the death screen so
+        deaths teach. Still open: actual balance changes (grace period /
+        Easy-Normal toggle) and damage telegraphing below.
 - [ ] Damage telegraphing: zombie wind-up animation + screen-edge red vignette
       when one is close behind you
 

@@ -17,6 +17,31 @@ continue each other's work.
 
 ---
 
+## 2026-07-03 — Claude (claude-code) — #15 survival hints (start + death tips)
+**State:** working — text-only UI, no gameplay/AI/balance change. Live game safe.
+**Shipped:** `index.html` gains a `#start-tip` line and a `#death-tip` line
+(+ CSS). `src/ui.js` sets a fixed start-screen night-danger warning and, on
+death, shows one of six rotating survival tips (`DEATH_TIPS`) so a loss
+teaches. Every tip is checked against the real mechanics (night detect
+18m/12m, safe zone, bandage +25, food/water drain 2 HP/s at 0, heal only when
+hunger & thirst > 60). Addresses the low-risk half of issue #15; balance
+changes + damage telegraphing remain open (noted in ROADMAP). CHANGELOG →
+v0.3.2. On PR branch `claude/game-maintenance-session-39zw54` (PR #17), not
+pushed to production.
+**Verified:** `npm run build` green (133.28 KB gzip, under budget). Headless
+Playwright (393×851): start tip renders and is visible with the exact expected
+text; zero console errors; entered world and start screen dismissed. Death
+screen driven via DOM (game handle isn't global): death-tip renders, sits
+above the Respawn button, no horizontal overflow, zero page errors.
+**Next up:** issue #15 balance half (Day-1 grace / Easy-Normal toggle) or
+damage telegraphing (red edge vignette) — both need an owner call on difficulty
+feel. Or Milestone 1 "better trees." Cloud-save chain (#5–#8) still blocked on
+the owner's account-model decision in #12.
+**Gotchas:** the `game` context is not exposed on `window`; to drive gameplay
+in a headless test you must add a temporary handle or play it out. Tips must
+stay factually true to mechanics — update them if constants in stats.js /
+enemies.js change.
+
 ## 2026-07-03 — Claude (claude-code) — Tech-debt #9: stable vehicle ids
 **State:** working — serialization-only change, live game untouched.
 **Shipped:** `src/vehicles.js` — each wreck now has a stable string `id`
