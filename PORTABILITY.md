@@ -102,7 +102,15 @@ There are no other secrets. No API keys in code, no .env files, no databases.
 
 ## Known portability gaps (tracked as GitHub issues)
 
-1. Deploys currently require SOME machine with an authenticated Vercel CLI.
-   Fix: enable Vercel ↔ GitHub integration (push to main = auto-deploy), which
-   removes the need for any local CLI. Issue filed.
-2. GITHUB_TOKEN expiry 2026-09-30 requires owner action. Issue filed.
+1. ~~Deploys require a machine with an authenticated Vercel CLI~~ — RESOLVED
+   2026-07-02: Vercel ↔ GitHub integration enabled. `git push` to main
+   auto-deploys production. No local Vercel CLI needed for normal work
+   (steps 2's `vercel login` and step 5 are now optional fallbacks).
+2. GITHUB_TOKEN expiry 2026-09-30 requires owner action. Issue #3.
+
+## Clean-room test result (2026-07-02)
+
+Fresh clone → `npm install` → `npm run build` on a machine-independent copy
+produced a byte-identical bundle with zero undocumented steps. The only
+owner-interactive steps are the two account logins (gh, and optionally vercel),
+both documented above. Verified portable.

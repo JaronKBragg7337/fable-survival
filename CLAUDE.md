@@ -38,14 +38,15 @@ That link must never break. This is the project's prime directive.
 
 **Deploy (only after verification):**
 ```bash
-# from the PROJECT ROOT (since v0.2.0 — api/ functions must ship too)
-vercel deploy --prod --yes
+git push    # that's it — Vercel Git integration auto-deploys main to production
 ```
-Vercel builds remotely per vercel.json (npm run build → dist) and deploys the
-`api/` serverless functions alongside. The owner's Vercel CLI is authenticated
-on this machine; production alias is fable-survival.vercel.app. If a deploy is
-bad: `vercel rollback`. (Do NOT deploy from `dist/` anymore — that would drop
-the /api/feedback endpoint.)
+Since 2026-07-02 the Vercel project is connected to the GitHub repo: every push
+to `main` builds (per vercel.json) and deploys game + `api/` functions with no
+CLI needed. This means **a push IS a production deploy — never push unverified
+code to main.** Check status with `vercel ls` or the Vercel dashboard. If a
+deploy is bad: `vercel rollback` (or promote a previous deployment in the
+dashboard). CLI deploys (`vercel deploy --prod --yes` from project root) still
+work as a fallback. Never deploy from `dist/` — that drops /api/feedback.
 
 **On session end (do not skip):**
 1. Add a new entry at the TOP of HANDOFF.md using its template.
