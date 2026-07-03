@@ -17,6 +17,30 @@ continue each other's work.
 
 ---
 
+## 2026-07-03 — Codex — #5 Supabase cloud-save foundation
+**State:** working — Supabase project exists and schema foundation is applied.
+Live game remains unchanged; cloud save is not called by gameplay yet.
+**Shipped:** `supabase/migrations/20260703094251_cloud_save_foundation.sql`
+creates `player_accounts` and `player_saves` with RLS enabled and server-only
+`service_role` grants. Revoked public/anon/authenticated execute on
+`public.rls_auto_enable()` after Supabase advisors flagged it. Added
+`.env.example` placeholders plus `SUPABASE.md`; updated BOOTSTRAP/AGENTS,
+ROADMAP, PORTABILITY, CHANGELOG.
+**Verified:** Supabase connector sees project `fable-survival`
+(`ukguppzfpvdcemyxzdbn`) ACTIVE_HEALTHY in us-west-2. Migration applied
+successfully; migration list shows `20260703094251 cloud_save_foundation`.
+SQL verification: both tables exist with RLS enabled; anon/authenticated have
+no grants; service_role has table access. Security advisors now only show
+INFO-level "RLS enabled no policy" notices for those server-only tables;
+performance advisors clean.
+**Next up:** #6 Vercel `/api/account` + `/api/save` functions, but only after
+the owner adds `SUPABASE_URL` and the Supabase secret key to Vercel as
+`SUPABASE_SECRET_KEY`. Do not paste the `sb_secret_...` key into chat or commit
+it.
+**Gotchas:** The pasted `sb_publishable_...` key is browser-safe by design, but
+the repo intentionally stores only placeholders. The live app has no Supabase
+runtime dependency yet, so this commit should not change gameplay behavior.
+
 ## 2026-07-03 — Codex — #16 dropped loot ground pickups
 **State:** working — dropped items are tangible again, mobile QA passed locally.
 Live deploy expected via push-to-main Vercel integration.

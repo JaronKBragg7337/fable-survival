@@ -2,6 +2,14 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.5.1 — 2026-07-03
+
+- Supabase cloud-save foundation added (#5): project `fable-survival`
+  (`ukguppzfpvdcemyxzdbn`) now has a committed/applied migration for
+  `player_accounts` and `player_saves`, with RLS enabled and no browser table
+  grants. Added `.env.example` and `SUPABASE.md` documenting the safe
+  publishable-key/server-secret split. No live gameplay calls Supabase yet.
+
 ## v0.5.0 — 2026-07-03
 
 - Dropped loot is now tangible ground pickups instead of vanishing. Player

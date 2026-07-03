@@ -57,6 +57,13 @@ must not break the live link. See CLAUDE.md for the full protocol.
 
 ## Milestone 4 — Multiplayer-ish & Meta (research first, then decide)
 
+- [x] Cloud-save foundation: Supabase project `fable-survival` plus
+      `player_accounts` / `player_saves` schema with RLS and server-only grants
+      (#5). See SUPABASE.md.
+- [ ] Cloud-save server API: Vercel `/api/account` + `/api/save` functions using
+      `SUPABASE_SECRET_KEY` (#6). Requires owner to add the secret key in Vercel;
+      never paste it into chat or commit it.
+- [ ] Optional cloud-save client bridge over localStorage (#7) and UI (#8)
 - [ ] Research: WebRTC or lightweight websocket co-op — is it feasible to keep
       free hosting? Write findings to Research Notes below before building.
 - [ ] Daily challenge seed: same world layout for all players that day

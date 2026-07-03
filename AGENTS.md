@@ -15,6 +15,7 @@ Read in this order before doing anything:
 5. **PLAYER_FEEDBACK.md** — what real players experienced (patterns here outrank
    assumptions; follow its privacy rules strictly — testers are mostly kids)
 6. **ROADMAP.md** — the backlog; take the top unchecked item of the current milestone
+7. **SUPABASE.md** — cloud-save backend/project notes when touching Supabase
 
 Disaster recovery / new machine setup: **PORTABILITY.md**.
 
