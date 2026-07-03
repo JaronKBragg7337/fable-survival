@@ -48,11 +48,12 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - [ ] Weapons: bat/spear from crafting, ranged slingshot (pooled projectiles)
 - [ ] Cooking on campfires: raw→cooked food, better hunger restore
 - [ ] Zombie variety: fast crawler, tanky brute (same pool, different stats/mesh)
-- [ ] Dropped items appear on the ground as pickups (currently they vanish)
+- [x] Dropped items appear on the ground as pickups (no longer vanish)
       - OWNER PRIORITY 2026-07-03 (#16): structures first (DONE) → **dropped
         loot next** → then general pickups. Zombie loot / dropped-item drops
         should land on the ground and be walk-over/USE pickups (pool the
-        ground-item meshes like enemies).
+        ground-item meshes like enemies). Shipped v0.5.0: player inventory
+        drops + infected bandage/scrap drops use a 32-item ground-pickup pool.
 
 ## Milestone 4 — Multiplayer-ish & Meta (research first, then decide)
 

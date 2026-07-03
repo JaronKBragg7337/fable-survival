@@ -66,7 +66,8 @@ badly wrong: `git checkout v0.1.0-foundation` builds a working game.
 `src/main.js` bootstraps a shared `game` context and the loop. Systems:
 `input` (touch joystick + WASD/mouse), `player`, `cameraController`, `collision`
 (circle/AABB push-out, no physics lib), `world` (seeded deterministic map gen,
-resource nodes, loot crates, safe zone), `items`/`inventory`, `building`,
+resource nodes, loot crates, safe zone), `items`/`inventory`, `pickups`,
+`building`,
 `enemies` (pooled, state-machine AI), `trader`, `vehicles` (repair stub),
 `stats`, `daynight`, `save` (localStorage), `ui` (all DOM). Each file's header
 comment explains how to expand it. New systems = new module + construct in

@@ -9,7 +9,7 @@ import { PIECES } from './building.js';
 import { TRADER_STOCK } from './trader.js';
 
 // bump when shipping notable changes; included in feedback reports
-export const GAME_VERSION = '0.4.0';
+export const GAME_VERSION = '0.5.0';
 
 // Short survival tips shown on death so a loss teaches something (issue #15).
 // Keep every line factually true to the mechanics — players learn from these.
@@ -133,9 +133,9 @@ export class UI {
         inv.removeSlot(this.selectedSlot, 1);
         this.toast(`Used ${d.icon} ${d.name}`);
       } else if (el.dataset.act === 'drop') {
-        inv.removeSlot(this.selectedSlot, 1);   // prototype: dropped items vanish
+        if (this.game.pickups.dropFromPlayer(slot.id, 1)) inv.removeSlot(this.selectedSlot, 1);
       } else if (el.dataset.act === 'dropall') {
-        inv.removeSlot(this.selectedSlot, slot.count);
+        if (this.game.pickups.dropFromPlayer(slot.id, slot.count)) inv.removeSlot(this.selectedSlot, slot.count);
       }
       if (!inv.slots[this.selectedSlot]) this.selectedSlot = -1;
       this.renderInventory();

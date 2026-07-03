@@ -45,6 +45,7 @@ Each system lives in its own module under `src/` with a header comment explainin
 | `collision.js` | circle/AABB push-out collision (no physics engine) |
 | `world.js` | seeded map gen, resource nodes, loot containers, safe zone |
 | `items.js` / `inventory.js` | item database, stacking slot inventory |
+| `pickups.js` | pooled dropped-item meshes and walk-over/USE collection |
 | `building.js` | ghost placement, floors/walls/doors/campfire/storage |
 | `enemies.js` | pooled infected with wander/chase/attack/return AI |
 | `trader.js` | safe-zone buy/sell economy |
@@ -58,4 +59,4 @@ Performance choices for phones: instanced meshes for trees/rocks/fence, emoji "i
 
 ## Known limitations
 
-Dropped items vanish rather than appearing on the ground; driving is stubbed (repair works, driving "coming soon"); zombies path straight at you and can snag on obstacles; death keeps your inventory (prototype-friendly); saves are per-browser/per-device; houses are axis-aligned; no audio yet.
+Dropped pickups are runtime-only and do not persist across reloads yet; driving is stubbed (repair works, driving "coming soon"); zombies path straight at you and can snag on obstacles; death keeps your inventory (prototype-friendly); saves are per-browser/per-device; houses are axis-aligned; no audio yet.

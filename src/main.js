@@ -21,6 +21,7 @@ import { Vehicles } from './vehicles.js';
 import { DayNight } from './daynight.js';
 import { SaveSystem } from './save.js';
 import { UI } from './ui.js';
+import { Pickups } from './pickups.js';
 
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
@@ -57,6 +58,7 @@ game.buildings = new Buildings(game);
 game.enemies = new Enemies(game);
 game.trader = new Trader(game);
 game.vehicles = new Vehicles(game);
+game.pickups = new Pickups(game);
 game.dayNight = new DayNight(game);
 game.save = new SaveSystem(game);
 game.ui = new UI(game);
@@ -103,6 +105,7 @@ function loop() {
     game.player.update(dt);
     game.enemies.update(dt);
     game.world.update(dt);
+    game.pickups.update(dt);
     game.buildings.update();
     game.dayNight.update(dt);
     game.stats.update(dt, game.player.sprinting);

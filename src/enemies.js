@@ -77,8 +77,8 @@ export class Enemies {
     const coins = 3 + Math.floor(Math.random() * 4);
     this.game.coins += coins;
     let msg = `Infected down! +${coins} 🪙`;
-    if (Math.random() < 0.25) { this.game.inventory.add('bandage', 1); msg += ' +🩹'; }
-    if (Math.random() < 0.2) { this.game.inventory.add('scrap', 1); msg += ' +⚙️'; }
+    if (Math.random() < 0.25 && this.game.pickups.spawn('bandage', 1, z.pos.x, z.pos.z)) msg += ' dropped 🩹';
+    if (Math.random() < 0.2 && this.game.pickups.spawn('scrap', 1, z.pos.x, z.pos.z)) msg += ' dropped ⚙️';
     this.game.ui.toast(msg);
   }
 

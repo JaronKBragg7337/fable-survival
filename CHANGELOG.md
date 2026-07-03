@@ -2,6 +2,15 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.5.0 — 2026-07-03
+
+- Dropped loot is now tangible ground pickups instead of vanishing. Player
+  inventory drops spawn just ahead of the survivor and can be collected by
+  pressing USE nearby or walking over them. Infected still grant coins
+  immediately, but their bandage/scrap bonus loot now drops at the body as a
+  pickup. Implemented as a fixed 32-item mesh pool (`src/pickups.js`) to avoid
+  runtime allocation churn on phones.
+
 ## v0.4.0 — 2026-07-03
 
 - Three explorable landmark structures added to the world (#16): a roadside

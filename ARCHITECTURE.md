@@ -12,7 +12,7 @@ Instant dev server, tiny config, static `dist/` output that deploys anywhere.
 No framework (React etc.) because the game UI is a handful of DOM panels —
 a framework adds bundle weight and abstraction for zero gain here.
 
-**Why one module per system (16 files in src/)?**
+**Why one module per system?**
 So an AI session can change the trader without reading the zombie AI. Every
 module has a header comment saying how to expand it. Never merge systems into
 one file; never let main.js grow beyond bootstrapping + the loop.

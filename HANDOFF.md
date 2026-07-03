@@ -17,6 +17,36 @@ continue each other's work.
 
 ---
 
+## 2026-07-03 — Codex — #16 dropped loot ground pickups
+**State:** working — dropped items are tangible again, mobile QA passed locally.
+Live deploy expected via push-to-main Vercel integration.
+**Shipped:** `src/pickups.js` adds a fixed 32-item pooled ground-pickup system.
+Inventory Drop 1 / Drop all now spawns pickups just ahead of the player instead
+of deleting items. Infected still award coins immediately, but their bonus
+bandage/scrap loot now drops on the ground at the body. Pickups can be collected
+with USE inside range or by walking over them. `main.js` wires the system into
+the loop; `ui.js` bumps GAME_VERSION to 0.5.0; docs updated.
+**Verified:** Google Drive checkout build still hangs, so verification used a
+temp worktree without `node_modules/.git/dist`. `npm install && npm run build`
+green there: 21 modules, JS gzip 134.83 KB. Module smoke passed for pickup
+spawn/collect and zombie loot drop path. Local production preview Pixel-size
+Playwright QA: dropped canned food, saw "Pick up Canned Food x1 — tap USE",
+tapped USE, inventory restored the can, zero relevant console warnings/errors,
+zero page errors, zero request failures. Pre-work production smoke also passed:
+live URL loaded, mobile HIT harvested wood, inventory showed Wood x1, movement
+saved position changes.
+**Next up:** Continue #16 loop depth with a small general-pickup follow-up
+only if needed (for example save/restore active ground pickups), otherwise
+return to ROADMAP top unchecked Milestone 1 item: better trees with 2-3
+instanced variants.
+**Gotchas:** Active ground pickups are runtime-only and are not serialized in
+localStorage; that is intentional for this slice but should be revisited before
+valuable persistent loot piles matter. Browser plugin pointer-lock clicks
+produce `WrongDocumentError`, so use standalone Playwright for desktop canvas
+attack QA. npm audit reports Vite/esbuild dev-server/tooling findings requiring
+a Vite major upgrade to force-fix; tracked separately as #18, do not combine
+with gameplay work.
+
 ## 2026-07-03 — Claude (claude-code) — #16 explorable structures (gas/barn/tower)
 **State:** working — 3 new landmark structures. Live game safe; existing map
 layout (trees/rocks/houses) unchanged.
