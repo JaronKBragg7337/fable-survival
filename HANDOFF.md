@@ -17,6 +17,21 @@ continue each other's work.
 
 ---
 
+## 2026-07-02 (night) — Claude (Cowork) — Clean-room test PASSED; push-to-deploy LIVE
+**State:** working, 100% portable. Deploys are now `git push` (Vercel Git
+integration, enabled by owner). A push IS a production deploy — verify first.
+**Shipped:** BOOTSTRAP.md (first-contact protocol). CLAUDE.md deploy section
+rewritten for push-to-deploy. PORTABILITY.md gap #1 marked resolved + clean-room
+result recorded. Issues #2 and #4 closed.
+**Verified:** Clean-room drill: fresh `gh repo clone` into an empty dir →
+npm install (3s) → build produced a BYTE-IDENTICAL bundle. Zero undocumented
+steps. Then pushed docs commit → Vercel auto-deployed production in 8s with no
+CLI → game 200, /api/feedback 200, issue #4 created and closed.
+**Next up:** Milestone 1 top item (ground variety / visual pass) — the
+infrastructure era is done, back to the game itself.
+**Gotchas:** since push = deploy, never push half-done work to main. If risky
+work is needed, use a branch and merge when verified.
+
 ## 2026-07-02 (evening) — Claude (Cowork) — Portability audit, PORTABILITY.md
 **State:** working — no gameplay changes this session (audit only)
 **Shipped:** PORTABILITY.md (full new-machine recovery procedure, source-of-truth
