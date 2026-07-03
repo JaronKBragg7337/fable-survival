@@ -14,6 +14,8 @@ Read in this order before doing anything:
    assumptions; follow its privacy rules strictly — testers are mostly kids)
 6. **ROADMAP.md** — the backlog; take the top unchecked item of the current milestone
 
+Disaster recovery / new machine setup: **PORTABILITY.md**.
+
 Non-negotiables, whoever you are:
 
 - The live game at https://fable-survival.vercel.app must never break.

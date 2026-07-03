@@ -17,6 +17,22 @@ continue each other's work.
 
 ---
 
+## 2026-07-02 (evening) — Claude (Cowork) — Portability audit, PORTABILITY.md
+**State:** working — no gameplay changes this session (audit only)
+**Shipped:** PORTABILITY.md (full new-machine recovery procedure, source-of-truth
+map, secret recreation steps, disaster scenarios). AGENTS.md points to it.
+GitHub issues #2 (enable Vercel-GitHub push-to-deploy — the last machine
+dependency) and #3 (rotate GITHUB_TOKEN before 2026-09-30), label `portability`.
+**Verified:** git ls-files vs local dir — all 32 files tracked, tree clean, no
+untracked assets, both tags pushed, zero binary assets. Only gitignored items
+are regenerable (node_modules, dist, .vercel). GITHUB_TOKEN lives in Vercel
+cloud, not the laptop. Portability score: 95%.
+**Next up:** Owner enables Vercel Git integration (issue #2) → then update
+CLAUDE.md deploy section to "git push = deploy" and close the issue. After
+that, Milestone 1 top item.
+**Gotchas:** package-lock.json is platform-sensitive for rollup optional deps;
+recovery steps for that are in PORTABILITY.md step 4.
+
 ## 2026-07-02 (later) — Claude (Cowork) — v0.2.0: in-game feedback → GitHub issues
 **State:** working — live at https://fable-survival.vercel.app. Feedback endpoint
 deployed but returns 503 not-configured until owner adds GITHUB_TOKEN env var
