@@ -1,5 +1,7 @@
 # AGENTS.md — For Any AI Agent (Claude, Codex, Gemini, ChatGPT, future models)
 
+**Brand new to this project? Start with BOOTSTRAP.md — it's the checklist.**
+
 This repository is AI-maintained. The canonical operating instructions live in
 **CLAUDE.md** (named that way because Claude Code auto-loads it — treat it as
 the generic agent manual regardless of which model you are).
