@@ -2,6 +2,11 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.2.1 — 2026-07-03
+
+- Added a tiny inline SVG favicon so Chrome no longer logs a missing
+  `/favicon.ico` 404 when loading the live game.
+
 ## v0.2.0 — 2026-07-02
 
 - In-game feedback button (💬): nickname (made-up names enforced by copy),

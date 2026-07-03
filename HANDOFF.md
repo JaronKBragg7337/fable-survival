@@ -17,6 +17,23 @@ continue each other's work.
 
 ---
 
+## 2026-07-03 — Codex — Fixed live favicon console 404
+**State:** working — bootstrap found production loading with one console error:
+Chrome requested missing `/favicon.ico`. Gameplay stayed playable, but the
+"zero console errors" gate failed, so this session stopped at the bootstrap fix.
+**Shipped:** added a tiny inline SVG favicon in `index.html` so browsers do not
+request the missing default icon. Deployed by pushing `main` to Vercel Git
+integration. URL: https://fable-survival.vercel.app
+**Verified:** required docs read; `git log --oneline -10` matched the previous
+top handoff; no open `player-feedback` issues. Clean temp clone build passed
+before changes. Modified temp build passed. Local preview on Pixel 5 emulation:
+entered world, mobile joystick/action buttons visible/tappable, one canvas,
+zero console/page/4xx events.
+**Next up:** Milestone 1 top item: ground variety / visual pass.
+**Gotchas:** installing `node_modules` directly inside the Google Drive checkout
+produced EBADF/invalid Vite package files. Clean temp clones under `%TEMP%`
+install and build correctly; use that path for verification if Drive acts up.
+
 ## 2026-07-02 (night) — Claude (Cowork) — Clean-room test PASSED; push-to-deploy LIVE
 **State:** working, 100% portable. Deploys are now `git push` (Vercel Git
 integration, enabled by owner). A push IS a production deploy — verify first.
