@@ -18,8 +18,7 @@ continue each other's work.
 ---
 
 ## 2026-07-03 — Codex — #6 cloud-save Vercel API
-**State:** in-progress until live endpoint smoke completes after push; gameplay
-bundle unchanged.
+**State:** working — live endpoint smoke passed; gameplay bundle unchanged.
 **Shipped:** Added `api/_cloud.js`, `api/account.js`,
 `api/account/login.js`, `api/account/link.js`, and `api/save.js`.
 `POST /api/account` creates username/password accounts or one-tap player-code
@@ -28,16 +27,17 @@ passwords; link redeems recovery codes. `GET/PUT /api/save` require
 `Authorization: Bearer <session token>`. Added `bcryptjs` dependency for
 password/recovery-code hashing. Added Supabase migrations for
 `player_sessions` and redundant-index cleanup. Docs updated.
-**Verified:** Clean temp worktree `npm install && npm run build` passed before
-docs, 21 modules, JS gzip 134.83 KB; API helper/handler imports passed.
-Supabase migration list shows `cloud_save_foundation`, `cloud_save_sessions`,
-and `drop_redundant_session_token_index`; RLS enabled on accounts/saves/sessions.
+**Verified:** Clean temp worktree `npm install && npm run build` passed, 21
+modules, JS gzip 134.83 KB; API helper/handler imports passed. Supabase
+migration list shows `cloud_save_foundation`, `cloud_save_sessions`, and
+`drop_redundant_session_token_index`; RLS enabled on accounts/saves/sessions.
 Security advisors show only expected INFO-level "RLS enabled no policy" notices
-for server-only tables. Performance advisor only notes the new player/expires
-index is unused so far, expected before traffic.
-**Next up:** Push/deploy, then live-smoke `/api/account`, `/api/account/login`,
-`/api/save` PUT/GET, and `/api/account/link`. Clean test rows afterward. If
-green, close #6 and move to #7 cloudSave.js client bridge.
+for server-only tables. Live Vercel smoke passed: created password account,
+logged in, PUT save, GET save with semantic save fields intact, linked via
+recovery code, created one-tap player-code account, then deleted both test
+accounts from Supabase.
+**Next up:** #7 `src/cloudSave.js` client bridge layered over localStorage, then
+#8 UI for optional cloud save.
 **Gotchas:** Rate limiting is in-memory per serverless instance; good enough for
 Phase 1 friction, not a hard abuse wall. Recovery codes are one-time for link.
 The UI still does not expose cloud save until #7/#8.
