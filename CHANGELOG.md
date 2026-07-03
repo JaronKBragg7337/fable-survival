@@ -2,6 +2,15 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.5.2 — 2026-07-03
+
+- Cloud-save server API added (#6): Vercel functions now support account
+  creation, username/password login, recovery-code linking, and authenticated
+  save read/write. Passwords and recovery codes are hashed with `bcryptjs`;
+  save access uses short-lived bearer session tokens stored only as SHA-256
+  hashes. The game UI still does not call cloud save yet; this unblocks the
+  client bridge/UI work in #7/#8.
+
 ## v0.5.1 — 2026-07-03
 
 - Supabase cloud-save foundation added (#5): project `fable-survival`

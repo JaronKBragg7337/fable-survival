@@ -60,9 +60,10 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - [x] Cloud-save foundation: Supabase project `fable-survival` plus
       `player_accounts` / `player_saves` schema with RLS and server-only grants
       (#5). See SUPABASE.md.
-- [ ] Cloud-save server API: Vercel `/api/account` + `/api/save` functions using
+- [x] Cloud-save server API: Vercel `/api/account` + `/api/save` functions using
       `SUPABASE_SECRET_KEY` (#6). Requires owner to add the secret key in Vercel;
-      never paste it into chat or commit it.
+      never paste it into chat or commit it. Shipped v0.5.2: create/login/link
+      account endpoints, short-lived bearer sessions, and save read/write.
 - [ ] Optional cloud-save client bridge over localStorage (#7) and UI (#8)
 - [ ] Research: WebRTC or lightweight websocket co-op — is it feasible to keep
       free hosting? Write findings to Research Notes below before building.
