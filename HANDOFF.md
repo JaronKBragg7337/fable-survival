@@ -17,6 +17,33 @@ continue each other's work.
 
 ---
 
+## 2026-07-03 — Claude (Claude Code) — Phase 1 account model refined (owner decision, docs only)
+**State:** working — no gameplay code touched. No build risk (docs + issues only).
+Live game untouched; nothing deployed.
+**Shipped:** Refined MULTIPLAYER_DESIGN.md for the owner's approved Phase 1
+direction: **instant play, no login, + optional persistent accounts so survival
+progress isn't lost.** Accounts = **username+password OR one-tap player-code, no
+email in Phase 1** (email deferred, rationale in §2.4). Rewrote §2 (two account
+types, shared recovery-code backup, password hashed server-side). §3.1 now spells
+out that the cloud save protects the entire blob — inventory, stats, coins,
+position, day/night, buildings, vehicles — plus any future base progress for free
+(jsonb). Added §8.5 (instant-play-vs-lost-progress tradeoff, incl. iOS Safari
+~7-day ITP eviction as the key risk for iPhone kids) and §8.6 (milestone-triggered
+"save your game" prompt — once per session, dismissible, never a gate). Updated §6
+to app-managed auth (not Supabase email Auth). Updated GitHub issues #5 (schema:
+username/password_hash/recovery_hash), #6 (login endpoint + password hashing), #8
+(prompt-to-save UX + login UI), #12 (tracking). ROADMAP Research Notes updated.
+**Verified:** docs-only change; prior build already green (132.78 KB gz). No
+gameplay files modified. Design cross-checked against actual save fields in §1.
+**Next up:** Owner picks whether to start building Phase 1. First code step (issue
+#5): Supabase project + accounts/saves tables with RLS. Then #6 /api functions,
+#7 src/cloudSave.js, #8 UI + prompt. Do #9 (vehicles stable ids) before
+cross-device saves ship.
+**Gotchas:** STILL DESIGN ONLY — no implementation this session. Passwords must be
+hashed server-side (bcrypt/argon2), never plaintext; auth endpoints rate-limited.
+localStorage stays the source of truth on-device; any account/network work must
+keep offline + opt-out play byte-for-byte unchanged.
+
 ## 2026-07-03 — Claude (Claude Code) — Multiplayer/cloud-save design doc (no code changes)
 **State:** working — no gameplay code touched. Build verified green (132.78 KB gz,
 matches prior handoff). Live game untouched; nothing deployed.

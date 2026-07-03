@@ -23,13 +23,23 @@ browser game to accounts → cloud saves → persistent bases → real-time mult
   cost (servers, sync, cheating, moderation of kids) and directly threaten the
   prime directive. The value ladder is: **accounts + cloud save** (huge win,
   low risk) → **cross-device continuity** → *optional, much later* → co-op.
-- **Phase 1 (recommended next):** optional cloud save behind an account, layered
-  *on top of* localStorage, never replacing it. If the network or the backend is
-  down, the game plays exactly as it does today. This is the lowest-risk step and
-  unlocks the thing kids actually want ("I want my base on my friend's phone").
-- Recommended backend: **Supabase** (Postgres + Auth + Row-Level Security),
-  called from **Vercel serverless functions** (same pattern as the existing
-  `/api/feedback.js`), with GitHub staying as source-of-truth for code + issues.
+- **Phase 1 (owner-approved direction, 2026-07-03):** *instant play with no
+  login*, plus **optional persistent accounts** so serious players don't lose
+  survival progress. Cloud save is layered *on top of* localStorage, never
+  replacing it. If the network or backend is down — or the player never makes an
+  account — the game plays exactly as it does today. Accounts use **a username +
+  password, or a one-tap player-code — no email required in Phase 1** (see §2).
+- **The tradeoff, stated plainly:** anonymous/local players start in ten seconds
+  but their progress lives only in that one browser's storage — it's gone if
+  storage is cleared, on a new device, or (notably on iPhones) after iOS Safari
+  evicts unused site data. Account players keep their world across clears and
+  devices. So the game **prompts a player to save an account right when their
+  progress first becomes worth protecting** (first base, survived a night, got a
+  tool/vehicle part) — never as a launch gate (see §8.5).
+- Recommended backend: **Supabase** (Postgres + Row-Level Security), with
+  **app-managed accounts** (username+password hashed server-side, or player-code —
+  no email), called from **Vercel serverless functions** (same pattern as the
+  existing `/api/feedback.js`); GitHub stays source-of-truth for code + issues.
 
 ---
 
@@ -80,49 +90,83 @@ Today's `localStorage` key: **`fable_survival_v1`**, autosaved every 25 s
 The audience is kids on phones (owner's son + friends). The account system must be
 **frictionless, privacy-safe, and impossible to lock a kid out of their base.**
 
+**Owner decision (2026-07-03):** instant play with no login, *plus* optional
+persistent accounts. Account = **username + password OR a one-tap player-code.
+No email in Phase 1.**
+
 ### 2.1 Design principles
-- **Anonymous-first.** A player should be able to keep playing with zero signup,
-  exactly as today. Accounts are an *upgrade* ("save to the cloud / play on
-  another phone"), never a gate.
-- **No passwords for kids.** Passwords + kids = lockouts and shared credentials.
-  Prefer a **magic-link email** or a **device-linked "player code"** (see below).
-- **Minimal PII.** Store a self-chosen handle and, at most, an email for magic
-  links. This mirrors PLAYER_FEEDBACK.md privacy rules: handles only, no real
-  names, no ages/schools/locations. **COPPA/GDPR-K caution: collecting a child's
-  email is a legal responsibility.** The safest v1 avoids email entirely (see
-  "Player code" option) and defers true email auth until the owner decides it's
-  worth the compliance burden.
+- **Anonymous-first — no login to start.** A player keeps playing with zero
+  signup, exactly as today. An account is an *upgrade* ("don't lose your base"),
+  never a gate. The Play button never waits on the network or an account.
+- **localStorage is always the fallback.** The account layer only ever *adds* a
+  cloud mirror; it never removes or gates the local save. Offline, opt-out, and
+  backend-down all behave identically to today.
+- **Two low-friction ways to hold an account, player's choice (no email):**
+  a memorable **username + password**, or a zero-typing **player-code**. Email is
+  deliberately *not* collected in Phase 1 (see §2.4).
+- **Minimal PII.** A self-chosen username/handle only — no real names, ages,
+  schools, locations, contacts (mirrors PLAYER_FEEDBACK.md privacy rules; testers
+  are mostly kids). Sanitize like `api/feedback.js` (`slice`, strip `<>@`).
+- **Never lock a kid out of their base.** A forgotten password must not be a dead
+  end, so every account also gets a one-time recovery code as a backup (§2.2), and
+  the original device's local save always still works regardless.
 
-### 2.2 Two account options (pick per phase)
+### 2.2 The two account types (both ship in Phase 1)
 
-**Option A — "Player Code" (recommended for Phase 1, no email, no PII):**
-- On first cloud-save opt-in, the server mints an opaque account: a random UUID
-  (`player_id`) + a short human-friendly **recovery code** (e.g. `FABLE-7Q2K-9WTX`).
-- The device stores `player_id` in `localStorage`; the recovery code is shown once
-  ("write this down to play on another phone"). Entering the code on a new device
-  links it to the same account.
-- Zero email, zero password, COPPA-friendly. Downside: a lost code = lost cloud
-  account (but the local save on the original device still works — nothing is
-  destroyed). Good enough and safe for a kids' game.
+Both are **optional** and both authenticate to the *same* `accounts`/`saves`
+tables — they differ only in how the player proves who they are.
 
-**Option B — Magic-link email (defer to later phase, only if the owner wants it):**
-- Supabase Auth email OTP / magic link. Real account recovery, but introduces
-  email collection from minors → compliance obligations. Only adopt with the
-  owner's explicit decision, and consider requiring a parent's email.
+**Type A — Username + password (recommended default for the "serious player"):**
+- Player picks a unique username (case-insensitive) and a password. That's the
+  whole signup — **no email, no verification step.**
+- The password is **hashed server-side (bcrypt/argon2) — never stored or logged
+  in plaintext**, never sent anywhere but our `/api/account` function over HTTPS.
+- To continue on another device: type username + password. Memorable, kid-owned,
+  no code to lose.
+- On creation the server *also* issues a one-time **recovery code** (below) as a
+  "forgot my password" backup, since there's no email reset path.
+
+**Type B — Player-code (recommended for the youngest / zero-friction path):**
+- One tap "Save my game" → server mints an opaque account (`player_id`) + a short
+  human-friendly **recovery code** (e.g. `FABLE-7Q2K-9WTX`), shown **once**
+  ("write this down to play on another phone").
+- No username, no password to manage. To continue elsewhere: enter the code.
+- Downside: a lost code = lost *cloud* account (the local save on the original
+  device still works — nothing is destroyed).
+
+The **recovery code is the common recovery primitive** for both types: it's the
+backup for a forgotten password (Type A) and the sole credential for Type B. Store
+it hashed, treat it like a password.
 
 ### 2.3 Account data model (conceptual)
 ```
-account
-  player_id     uuid    (primary key)
-  handle        text    (self-chosen nickname, ≤24 chars, sanitized like feedback.js)
-  recovery_code text    (hashed; Option A)
-  email         text    (nullable; Option B only)
-  created_at    timestamptz
-  last_seen_at  timestamptz
+accounts
+  player_id      uuid    (primary key)
+  username       citext  (nullable, UNIQUE; Type A — case-insensitive)
+  password_hash  text    (nullable; Type A — bcrypt/argon2, NEVER plaintext)
+  handle         text    (display nickname, ≤24 chars, sanitized like feedback.js)
+  recovery_hash  text    (hashed one-time recovery code; both types)
+  created_at     timestamptz
+  last_seen_at   timestamptz
 ```
-Handle sanitation should reuse the exact rules already in `api/feedback.js`
-(`slice(0,24)`, strip `<>@`). One player → one account → one save (Phase 1).
-Multiple save slots become `save_slot` rows later if desired.
+- One player → one account → one save (Phase 1). Multiple save slots become
+  `save_slot` rows later if desired.
+- A Type-B account has `username`/`password_hash` null; a Type-A account can add
+  them. This lets a player who started with a player-code later "claim" a
+  username+password on the same `player_id` (nice-to-have, not required for v1).
+- `username` uniqueness is a DB constraint (`citext` + unique index). `handle`
+  stays a non-unique display name (may equal the username).
+
+### 2.4 Why no email in Phase 1 (and when it might change)
+- **No strong reason to collect it, and real cost to.** Username+password gives
+  cross-device login; the recovery code gives account recovery. Email would only
+  add *self-service* password reset — unnecessary at this scale (a handful of
+  friends).
+- **Collecting a minor's email is a COPPA/GDPR-K responsibility** (consent,
+  retention, deletion, breach exposure). Not worth it for the current audience.
+- **Revisit only if** the game grows beyond friends-and-family *and* password
+  resets become a real support burden — then consider optional email or, better,
+  a parent's email, as a deliberate owner decision.
 
 ---
 
@@ -132,6 +176,14 @@ Multiple save slots become `save_slot` rows later if desired.
 Do **not** invent a new shape. The cloud payload is the *same JSON* `save.js`
 already produces, wrapped in an envelope. This keeps `save.js` as the single
 serializer and makes migration trivial.
+
+**What the cloud save protects (all of it, automatically):** because the payload
+is the whole `save.js` blob, an account preserves **inventory, stats
+(health/stamina/hunger/thirst), coins, position, day/night state, buildings
+(including storage-box contents), and vehicle repair progress** — every field in
+the §1 table. And because it's stored as opaque `jsonb` (§3.2), **any future base
+progress or new save field is covered with zero backend change** — add it to
+`save.js` and it rides along. The cloud never needs to know what's inside.
 
 ### 3.2 Cloud envelope
 ```jsonc
@@ -291,8 +343,8 @@ runs Vercel serverless functions (`/api/feedback.js`) with a secret env var
                         │  Supabase                                    │
                         │  • Postgres: accounts, saves, (later) bases, │
                         │    leaderboard                               │
-                        │  • Auth (Option B, later) / or app-managed   │
-                        │    player codes (Option A, Phase 1)          │
+                        │  • App-managed auth: username+password        │
+                        │    (hashed) OR player-code — NO email (P1)    │
                         │  • Row-Level Security                        │
                         └─────────────────────────────────────────────┘
 
@@ -304,8 +356,11 @@ runs Vercel serverless functions (`/api/feedback.js`) with a secret env var
   never holds the Supabase service key — it calls our `/api/*` functions, which
   hold the secret (exactly like `feedback.js` holds `GITHUB_TOKEN`). This keeps
   the client dumb and the trust boundary in one place we already understand.
-- **Supabase free tier** comfortably covers a handful of kids: Postgres, auth,
-  RLS, generous row/egress limits. No bill for Phase 1.
+- **Supabase free tier** comfortably covers a handful of kids: Postgres, RLS,
+  generous row/egress limits. No bill for Phase 1. (Phase 1 uses **app-managed
+  accounts** — username+password hashed in our function, or player-code — not
+  Supabase's email Auth, since we're not collecting email. Supabase Auth remains
+  available later if email is ever wanted.)
 - **GitHub is untouched** as code + issue store. No architectural drift.
 - **New secrets** (`SUPABASE_URL`, `SUPABASE_SERVICE_KEY`) live in Vercel env
   vars — add them to PORTABILITY.md's secret-recreation list and note their
@@ -386,15 +441,26 @@ multiplayer's realtime, cheating, or moderation risk.
   fetch + JSON, no new heavy deps).
 
 ### 8.2 Slice of work
-1. Supabase project + `accounts` and `saves` tables with RLS (§2.3, §3.2).
-2. Vercel functions: `POST /api/account` (mint player-code account, Option A),
-   `POST /api/account/link` (redeem code on a new device), `GET/PUT /api/save`
-   (read/write the envelope; server checks the request's `player_id`).
+1. Supabase project + `accounts` and `saves` tables with RLS (§2.3, §3.2),
+   including `username` (unique, `citext`), `password_hash`, `recovery_hash`.
+2. Vercel functions (all mirror the `feedback.js` secret pattern — no key in the
+   browser):
+   - `POST /api/account` — create account. Body picks the type: Type A
+     `{ username, password, handle }` (server hashes the password, mints a backup
+     recovery code) or Type B `{ handle }` (server mints `player_id` + recovery
+     code). Returns `player_id` + the one-time recovery code.
+   - `POST /api/account/login` — Type A: `{ username, password }` → verify hash.
+   - `POST /api/account/link` — redeem a recovery code on a new device.
+   - `GET/PUT /api/save` — read/write the envelope; server authorizes the caller's
+     `player_id` (short-lived token/session from login, not a raw id from the
+     client).
+   - Rate-limit auth endpoints (throttle password/code guessing).
 3. `src/cloudSave.js`: opt-in flow, debounced push on top of the existing 25 s
    autosave, pull-and-reconcile on load (§3.3 conflict UX). Fails silent to local.
-4. Minimal UI: a "☁️ Cloud Save" entry (settings/start screen) — "Enable cloud
-   save" → shows the recovery code once; "Play on another device" → enter code.
-   Keep it out of the way of the core HUD; kids ignore what they don't need.
+4. UI (`src/ui.js`): a quiet, always-available "☁️ Save progress / Log in" entry
+   (start screen + pause/settings) offering **username+password or one-tap code**;
+   "Play on another device" → log in or enter code. Plus the **progress-at-risk
+   prompt** (§8.6). Keep it off the core HUD; kids ignore what they don't need.
 5. Fix the vehicles positional-id fragility (§4.3) so cross-device saves are safe.
 6. Env vars + PORTABILITY.md update + a rotation note for the new Supabase keys.
 
@@ -411,6 +477,58 @@ multiplayer's realtime, cheating, or moderation risk.
 ### 8.4 Explicit non-goals for Phase 1
 No realtime, no shared worlds, no seeing other players, no chat, no leaderboard
 (that's an easy Model-1 follow-on, but not required to bank the cloud-save win).
+
+### 8.5 The tradeoff: instant play vs. losing progress (say it plainly)
+Two ways to play, and the player chooses without ever being blocked:
+
+| | Anonymous / local (default) | Account (opt-in) |
+|---|---|---|
+| **To start** | Nothing — tap Play, ~10 s | Same instant start; sign up later |
+| **Progress lives** | Only in *this* browser's localStorage | Mirrored to the cloud |
+| **Survives storage clear?** | ❌ gone | ✅ restored on next login |
+| **Survives new device / browser?** | ❌ starts fresh | ✅ log in / enter code |
+| **Cost to the player** | None | One-time signup + remember login |
+
+**How local progress is actually lost** (why this matters for *this* audience):
+- Clearing browsing data / "clear site data" (a curious kid, a shared phone).
+- Private/Incognito tabs (nothing persists after close).
+- Switching phones or browsers, or reinstalling.
+- **iOS Safari ITP evicts unused site data after ~7 days** — a kid who doesn't
+  open the game for a week can lose everything, even without touching settings.
+  This is the single strongest reason accounts matter here (many testers are on
+  iPhones).
+- Storage-quota eviction under pressure.
+
+The honest framing shown to players: *"No account needed to play. But your world
+only lives on this phone until you save it — make a free account to keep it."*
+
+### 8.6 When to prompt to save (protect progress *before* it's at risk)
+**Never gate the game and never nag.** Default to a small, dismissible prompt that
+appears the moment a player's progress first becomes worth protecting — the *first*
+of these to happen in a session (checked cheaply against existing state):
+
+- Survived to **Day 2** (`dayNight.day >= 2` — they made it through a night), OR
+- Placed their **first base piece** (`buildings.placed.length >= 1`), OR
+- Obtained something **valuable**: a tool (axe/pickaxe), a vehicle part
+  (fuel/battery/wheel), or coins over a threshold (e.g. > 40), OR
+- Started **vehicle repair** (any part installed), OR
+- **~10 minutes** of active play.
+
+Behavior:
+- Show **once per session**, non-blocking, with **"Save my game"** and **"Not
+  now."** "Not now" is remembered for the session so it never repeats that play.
+- If dismissed, re-surface at the *next* clear milestone (e.g. first base built,
+  or Day 3), **capped** so it never becomes annoying — kids bounce off nagging.
+- Copy names the stake: *"You've survived to Day 2 and built a base — save it so
+  you don't lose it if this browser clears."*
+- A quiet, always-present **"☁️ Save progress"** affordance in the menu lets a
+  player opt in anytime without waiting for a prompt.
+- If the game ever gains a destructive local action (reset/new game), it must warn
+  and offer to save first.
+
+Implementation note: all trigger inputs already exist in the live game state
+(`dayNight.day`, `buildings.placed`, `inventory`, `vehicles`, a play-time
+counter) — the prompt is pure UI reading existing values, no gameplay change.
 
 ---
 
@@ -451,3 +569,13 @@ and `portability`.
   (issues #5–#12) and updated HANDOFF.md + ROADMAP.md Research Notes.
   Recommendation: proceed with **Phase 1 cloud save (Model 1)** when the owner is
   ready; defer realtime multiplayer.
+- **2026-07-03 (later) — Claude (Claude Code):** Refined the Phase 1
+  account/cloud-save plan per owner decision — *instant play, no login*, plus
+  **optional accounts via username+password OR one-tap player-code, no email in
+  Phase 1**. Rewrote §2 (account model, two types + recovery code + why-no-email
+  §2.4), made §3.1 spell out exactly what the cloud protects (all save fields +
+  future base progress via `jsonb`), and added §8.5 (the instant-play-vs-lost-
+  progress tradeoff, incl. iOS Safari 7-day eviction) and §8.6 (when to prompt to
+  save — milestone-triggered, once per session, never a gate). Updated the §6
+  architecture to app-managed auth (not Supabase email Auth). Still design-only —
+  no gameplay code changed. Issues #5/#6/#8/#12 updated to match.

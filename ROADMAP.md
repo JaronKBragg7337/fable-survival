@@ -91,3 +91,11 @@ must not break the live link. See CLAUDE.md for the full protocol.
   ship **Phase 1 optional cloud save (Supabase, Model 1 "shared seed")** layered
   over localStorage before any realtime multiplayer. Issues filed for the next
   steps. This folds into / supersedes the Milestone 4 "research first" items.
+- 2026-07-03 (later): **Owner approved Phase 1 direction** — instant play (no
+  login) + optional persistent accounts so progress isn't lost. Accounts =
+  **username+password OR one-tap player-code, no email in Phase 1**. Cloud save
+  protects the whole save blob (inventory/stats/coins/pos/day-night/buildings/
+  vehicles + future base progress). Game prompts to save at the first "progress
+  worth protecting" milestone (Day 2 / first base / got a tool or vehicle part),
+  never as a gate. Details in MULTIPLAYER_DESIGN §2, §8.5–8.6. Issues #5/#6/#8/#12
+  updated.
