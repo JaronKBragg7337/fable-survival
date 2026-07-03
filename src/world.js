@@ -43,7 +43,47 @@ export class World {
 
   _buildGround() {
     const s = this.game.scene;
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(this.halfSize * 2, this.halfSize * 2), this._mat(0x4a7c3f));
+    const size = this.halfSize * 2;
+    const segments = 44;
+    const groundGeo = new THREE.PlaneGeometry(size, size, segments, segments);
+    const pos = groundGeo.attributes.position;
+    const colors = [];
+    const color = new THREE.Color();
+    const lush = new THREE.Color(0x4f8541);
+    const grass = new THREE.Color(0x3f7138);
+    const dry = new THREE.Color(0x8a8348);
+    const dirt = new THREE.Color(0x76613f);
+    const dark = new THREE.Color(0x355d34);
+
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
+      const z = -pos.getY(i);
+      const roadD = Math.min(Math.abs(x), Math.abs(z));
+      const roadShoulder = roadD > 4.2 && roadD < 14;
+      const safeBlend = Math.hypot(x, z) < SAFE_R + 7;
+      const patch =
+        Math.sin(x * 0.043 + z * 0.019) +
+        Math.sin(z * 0.052 - x * 0.014) * 0.75 +
+        Math.sin((x + z) * 0.027) * 0.55;
+      const grain = Math.sin(x * 0.47 + z * 0.31) * 0.5 + Math.sin(x * 0.19 - z * 0.41) * 0.5;
+
+      if (roadShoulder || safeBlend) color.copy(dirt);
+      else if (patch > 1.05) color.copy(dry);
+      else if (patch < -1.0) color.copy(dark);
+      else color.copy(grass).lerp(lush, 0.35 + patch * 0.18);
+
+      color.lerp(dirt, Math.max(0, grain) * 0.08);
+      color.offsetHSL(0, 0, grain * 0.025);
+      colors.push(color.r, color.g, color.b);
+
+      const roadFlat = roadD < 8 || safeBlend;
+      const height = roadFlat ? 0 : (patch + grain * 0.35) * 0.025;
+      pos.setZ(i, height);
+    }
+    groundGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    groundGeo.computeVertexNormals();
+    const groundMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
     ground.rotation.x = -Math.PI / 2;
     s.add(ground);
 

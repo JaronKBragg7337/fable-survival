@@ -9,7 +9,7 @@ import { PIECES } from './building.js';
 import { TRADER_STOCK } from './trader.js';
 
 // bump when shipping notable changes; included in feedback reports
-export const GAME_VERSION = '0.2.0';
+export const GAME_VERSION = '0.3.0';
 
 export class UI {
   constructor(game) {

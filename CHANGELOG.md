@@ -2,6 +2,13 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.3.0 — 2026-07-03
+
+- Added procedural vertex-colored ground variety: grass, darker grass, dry
+  grass, dirt shoulders, and subtle terrain undulation with no texture assets.
+- Fixed the small zombie visual-facing bug that could make infected appear to
+  move backward; AI behavior was not rewritten.
+
 ## v0.2.1 — 2026-07-03
 
 - Added a tiny inline SVG favicon so Chrome no longer logs a missing

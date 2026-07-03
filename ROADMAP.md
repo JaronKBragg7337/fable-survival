@@ -11,7 +11,7 @@ must not break the live link. See CLAUDE.md for the full protocol.
 
 ## Milestone 1 — Look & Feel (make it prettier without making it heavier)
 
-- [ ] Ground variety: vertex-colored patches (dirt/grass/dry grass), no textures
+- [x] Ground variety: vertex-colored patches (dirt/grass/dry grass), no textures
 - [ ] Better trees: 2–3 tree variants (pine/oak/dead), still instanced
 - [ ] Simple procedural texture pass: generate small canvas textures at runtime
       (wood grain, brick, road asphalt) — zero download cost, big realism win

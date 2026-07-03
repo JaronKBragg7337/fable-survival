@@ -16,6 +16,7 @@ const DETECT_DAY = 12, DETECT_NIGHT = 18, LOSE_DIST = 24;
 const SPEED_WANDER = 1.3, SPEED_CHASE = 3.1, NIGHT_MULT = 1.2;
 const ATTACK_RANGE = 1.5, ATTACK_CD = 1.2, ATTACK_DMG = 8;
 const RESPAWN_T = 35, HP = 30;
+const FACE_OFFSET = Math.PI; // zombie arms point down local -Z, so rotate the visual front toward travel
 
 export class Enemies {
   constructor(game) {
@@ -171,10 +172,10 @@ export class Enemies {
     if (d < 0.05) return;
     z.pos.x += dx / d * step;
     z.pos.z += dz / d * step;
-    z.mesh.rotation.y = Math.atan2(dx, dz);
+    z.mesh.rotation.y = Math.atan2(dx, dz) + FACE_OFFSET;
   }
 
   _face(z, target) {
-    z.mesh.rotation.y = Math.atan2(target.x - z.pos.x, target.z - z.pos.z);
+    z.mesh.rotation.y = Math.atan2(target.x - z.pos.x, target.z - z.pos.z) + FACE_OFFSET;
   }
 }

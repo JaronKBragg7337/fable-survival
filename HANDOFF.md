@@ -17,6 +17,26 @@ continue each other's work.
 
 ---
 
+## 2026-07-03 — Codex — Milestone 1 ground variety shipped
+**State:** working — live game remains mobile-first and production deploy is
+expected via `git push` to `main`.
+**Shipped:** `src/world.js` now builds the base ground as one segmented
+vertex-colored mesh with grass/darker grass/dry grass/dirt shoulder patches and
+subtle static height variation, no textures or added assets. `src/enemies.js`
+adds a 180-degree visual facing offset so zombie arms/front point in their
+movement direction. `src/ui.js` feedback metadata bumped to v0.3.0. ROADMAP top
+Milestone 1 item checked off. Deployed: https://fable-survival.vercel.app
+**Verified:** clean temp build before edits passed; clean temp build after edits
+passed (132.78 KB gzip JS, under budget). Local Chrome/Playwright Pixel 5 QA:
+zero console/page/4xx events, entered world, touch controls visible, tapped HIT
+near a deterministic tree and gained wood, moved with joystick, opened inventory
+and saw wood. Visual screenshots inspected for road z-fighting, mobile overlap,
+and ground patch readability.
+**Next up:** Milestone 1 next item: better trees with 2-3 variants, still
+instanced.
+**Gotchas:** Google Drive checkout still corrupts generated `node_modules`;
+continue verifying builds from clean temp clones under `%TEMP%` when needed.
+
 ## 2026-07-03 — Codex — Fixed live favicon console 404
 **State:** working — bootstrap found production loading with one console error:
 Chrome requested missing `/favicon.ico`. Gameplay stayed playable, but the
