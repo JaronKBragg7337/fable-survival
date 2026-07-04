@@ -19,6 +19,7 @@ export class Player {
     this.onGround = true;
     this.attackTimer = 0;
     this.swingT = 0;                          // arm swing animation timer
+    this.inVehicle = null;                    // current vehicle when driving
     this.mesh = this._buildMesh();
     game.scene.add(this.mesh);
   }
@@ -41,7 +42,7 @@ export class Player {
 
   update(dt) {
     const { input, camCtl, stats } = this.game;
-    if (stats.dead) return;
+    if (stats.dead || this.inVehicle) return;  // skip movement when driving
 
     // --- movement (camera-relative) ---
     const sprinting = input.sprint && stats.stamina > 1 && (input.move.x || input.move.z);
@@ -88,12 +89,12 @@ export class Player {
   }
 
   jump() {
-    if (this.onGround && !this.game.stats.dead) { this.velY = JUMP_V; this.onGround = false; }
+    if (this.onGround && !this.game.stats.dead && !this.inVehicle) { this.velY = JUMP_V; this.onGround = false; }
   }
 
   // Melee swing: damages enemies AND harvests resource nodes in front.
   attack() {
-    if (this.attackTimer > 0 || this.game.stats.dead) return;
+    if (this.attackTimer > 0 || this.game.stats.dead || this.inVehicle) return;
     this.attackTimer = ATTACK_CD;
     this.swingT = 0.3;
     const facing = this.mesh.rotation.y;
@@ -121,6 +122,7 @@ export class Player {
   }
 
   respawn() {
+    if (this.inVehicle) this.game.vehicles.exitVehicle(this.inVehicle);
     this.pos.set(0, 0, 6);
     this.velY = 0;
     this.game.stats.reset();
