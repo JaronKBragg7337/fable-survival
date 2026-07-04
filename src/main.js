@@ -74,10 +74,16 @@ if (!game.save.load()) {
 
 // ---------- input wiring ----------
 game.input.on('interact', () => {
-  if (game.buildings.mode) game.buildings.place();
-  else game.player.interact();
+  if (game.player.inVehicle) {
+    game.vehicles.exitVehicle(game.player.inVehicle);
+  } else if (game.buildings.mode) {
+    game.buildings.place();
+  } else {
+    game.player.interact();
+  }
 });
 game.input.on('attack', () => {
+  if (game.player.inVehicle) { game.vehicles.exitVehicle(game.player.inVehicle); return; }
   if (game.buildings.mode) { game.buildings.exitMode(); game.ui.toast('Placement cancelled.'); }
   else { game.player.attack(); game.multiplayer.markAction('attack'); }
 });
@@ -89,7 +95,7 @@ game.input.on('closeAll', () => { game.ui.closeAll(); game.buildings.exitMode();
 
 // ---------- interactable proximity scan ----------
 function findNearInteractable() {
-  const p = game.player.pos;
+  const p = game.player.inVehicle ? game.player.inVehicle.mesh.position : game.player.pos;
   let best = null, bestD = 1e9;
   for (const t of game.interactables) {
     const d = Math.hypot(t.x - p.x, t.z - p.z);
@@ -104,16 +110,20 @@ function loop() {
   requestAnimationFrame(loop);
   const dt = Math.min(clock.getDelta(), 0.05); // clamp: no physics explosions after tab-switch
   if (game.started) {
-    game.player.update(dt);
-    game.enemies.update(dt);
-    game.world.update(dt);
-    game.pickups.update(dt);
-    game.buildings.update();
-    game.dayNight.update(dt);
-    game.stats.update(dt, game.player.sprinting);
-    game.save.update(dt);
-    game.multiplayer.update(dt);
-    findNearInteractable();
+    if (game.player.inVehicle) {
+      game.vehicles.update(dt);
+    } else {
+      game.player.update(dt);
+      game.enemies.update(dt);
+      game.world.update(dt);
+      game.pickups.update(dt);
+      game.buildings.update();
+      game.dayNight.update(dt);
+      game.stats.update(dt, game.player.sprinting);
+      game.save.update(dt);
+      game.multiplayer.update(dt);
+      findNearInteractable();
+    }
   }
   game.camCtl.update();
   game.ui.updateHUD();
