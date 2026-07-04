@@ -9,7 +9,7 @@ import { PIECES } from './building.js';
 import { TRADER_STOCK } from './trader.js';
 
 // bump when shipping notable changes; included in feedback reports
-export const GAME_VERSION = '0.5.0';
+export const GAME_VERSION = '0.6.0';
 
 // Short survival tips shown on death so a loss teaches something (issue #15).
 // Keep every line factually true to the mechanics — players learn from these.
@@ -20,6 +20,7 @@ const DEATH_TIPS = [
   '🥫 Canned food and 🧴 water stop the starve/thirst drain (2 HP/s at empty). Top up before either hits zero.',
   '❤️ You only heal when hunger and thirst are both above 60. Stay fed and hydrated to regenerate.',
   '🔨 A wall, a wall, and a door make a safe corner anywhere. Gather 🪵 and 🪨 early so you can build before night.',
+  '🚗 A repaired car can run over zombies and outrun them. Find fuel, battery, and wheels to fix one.',
 ];
 
 export class UI {
@@ -65,6 +66,10 @@ export class UI {
       if (this._open === 'inv') this.renderInventory();
       if (this._open === 'storage') this.renderStorage();
       if (this._open === 'trader') this.renderTrader();
+      if (this._open === 'vehicle') {
+        const v = this.game.vehicles.list.find(v => v.repaired && !v.driving);
+        if (v) this.renderVehicle(v);
+      }
     };
     this._open = null;
   }
@@ -237,9 +242,15 @@ export class UI {
   renderVehicle(v) {
     const p = this.$('vehicle-panel');
     const req = this.game.vehicles.required();
-    let html = this._panelHeader(v.repaired ? '🚗 Repaired Car' : '🚗 Broken Car');
+    let html = this._panelHeader(v.repaired ? (v.driving ? '🚗 Driving' : '🚗 Repaired Car') : '🚗 Broken Car');
     if (v.repaired) {
-      html += `<div style="font-size:12px">The engine runs! Driving arrives in a future update — for now this wreck is officially yours.</div>`;
+      if (v.driving) {
+        html += `<div style="font-size:12px">WASD / stick to drive. E / USE to exit.</div>`;
+        html += `<div class="rowbtns"><button data-exit>Exit car</button></div>`;
+      } else {
+        html += `<div style="font-size:12px">The engine is running! E / USE to enter and drive.</div>`;
+        html += `<div class="rowbtns"><button data-drive>Drive car</button></div>`;
+      }
     } else {
       html += `<div style="font-size:11px;opacity:.75;margin-bottom:6px">Install parts to repair (find them in crates or buy from the trader):</div>`;
       for (const [part, need] of Object.entries(req)) {
@@ -253,6 +264,8 @@ export class UI {
     p.innerHTML = html;
     this._wireClose(p);
     p.querySelectorAll('[data-part]').forEach(el => el.addEventListener('click', () => this.game.vehicles.install(v, el.dataset.part)));
+    p.querySelectorAll('[data-drive]').forEach(el => el.addEventListener('click', () => this.game.vehicles.enterVehicle(v)));
+    p.querySelectorAll('[data-exit]').forEach(el => el.addEventListener('click', () => this.game.vehicles.exitVehicle(v)));
   }
 
   // ---------- feedback (goes to GitHub issues via /api/feedback) ----------
@@ -298,7 +311,8 @@ export class UI {
         device: (this.game.input.isTouch ? 'touch ' : 'desktop ') + `${screen.width}x${screen.height}`,
         ua: navigator.userAgent.slice(0, 80),
         pos: `${Math.round(g.player.pos.x)},${Math.round(g.player.pos.z)}`,
-        day: g.dayNight.clockText()
+        day: g.dayNight.clockText(),
+        driving: g.player.inVehicle ? 'yes' : 'no'
       };
       const r = await fetch('/api/feedback', {
         method: 'POST',
