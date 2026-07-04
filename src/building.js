@@ -90,7 +90,9 @@ export class Buildings {
     for (const [k, n] of Object.entries(PIECES[id].cost)) this.game.inventory.remove(k, n);
 
     const { x, z, rotY } = this._pending;
-    this._instantiate({ piece: id, x, z, rotY });
+    const rec = { piece: id, x, z, rotY };
+    this._instantiate(rec);
+    this.game.multiplayer?.broadcastBuild(rec);
     this.game.ui.toast(`${PIECES[id].name} placed!`);
     // stay in build mode so you can chain-place walls
     if (!this.canAfford(id)) this.exitMode();

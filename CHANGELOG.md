@@ -2,6 +2,19 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.6.0 — 2026-07-04
+
+- Added Heartbeat Observatory multiplayer visibility MVP using the existing
+  Heartbeat Supabase Realtime system, not Fable's separate cloud-save backend.
+  Remote survivors now appear with nameplates, interpolated movement, sprint/
+  death state, and attack swing hints. The realtime chip shows solo/connected
+  status and shared games presence.
+- Local saves are unchanged and the game remains playable if realtime cannot
+  connect. Player-built pieces are broadcast to other connected clients as a
+  live playtest convenience.
+- Prepared the build for hosting inside Heartbeat Observatory at
+  `/games/fable-survival/`.
+
 ## v0.5.2 — 2026-07-03
 
 - Cloud-save server API added (#6): Vercel functions now support account

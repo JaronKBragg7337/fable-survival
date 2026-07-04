@@ -6,8 +6,13 @@ Supabase project for Fable Survival:
 - Project ref: `ukguppzfpvdcemyxzdbn`
 - Project URL: `https://ukguppzfpvdcemyxzdbn.supabase.co`
 - Region: `us-west-2`
-- Current use: cloud-save foundation only. The live game does not call Supabase
-  yet.
+- Current use: cloud-save foundation only. The live game does not call this
+  project for cloud save yet.
+
+Multiplayer note: live player visibility does **not** use this Fable Supabase
+project. When hosted under Heartbeat Observatory, `src/multiplayer.js` connects
+to Heartbeat's existing Supabase Realtime project so the Observatory account/
+guest presence system is reused instead of creating a second multiplayer stack.
 
 ## Key Rules
 

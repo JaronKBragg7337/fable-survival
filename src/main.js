@@ -22,6 +22,7 @@ import { DayNight } from './daynight.js';
 import { SaveSystem } from './save.js';
 import { UI } from './ui.js';
 import { Pickups } from './pickups.js';
+import { Multiplayer } from './multiplayer.js';
 
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
@@ -62,6 +63,7 @@ game.pickups = new Pickups(game);
 game.dayNight = new DayNight(game);
 game.save = new SaveSystem(game);
 game.ui = new UI(game);
+game.multiplayer = new Multiplayer(game);
 
 // starter kit for new survivors
 if (!game.save.load()) {
@@ -77,7 +79,7 @@ game.input.on('interact', () => {
 });
 game.input.on('attack', () => {
   if (game.buildings.mode) { game.buildings.exitMode(); game.ui.toast('Placement cancelled.'); }
-  else game.player.attack();
+  else { game.player.attack(); game.multiplayer.markAction('attack'); }
 });
 game.input.on('jump', () => game.player.jump());
 game.input.on('toggleBuild', () => game.ui.togglePanel('build'));
@@ -110,6 +112,7 @@ function loop() {
     game.dayNight.update(dt);
     game.stats.update(dt, game.player.sprinting);
     game.save.update(dt);
+    game.multiplayer.update(dt);
     findNearInteractable();
   }
   game.camCtl.update();

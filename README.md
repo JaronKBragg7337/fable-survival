@@ -3,7 +3,9 @@
 A DayZ-inspired, mobile-first browser survival prototype built with Three.js + Vite.
 No install needed — it runs from a link in any phone or desktop browser.
 
-**Play now: https://fable-survival.vercel.app**
+**Play on Heartbeat: https://www.heartbeatobservatory.com/games/fable-survival/**
+
+Original standalone deployment: https://fable-survival.vercel.app
 
 ## Controls
 
@@ -13,7 +15,7 @@ No install needed — it runs from a link in any phone or desktop browser.
 
 ## How to play
 
-You spawn in the fenced safe zone — infected never enter it. The trader there buys and sells gear. Hit trees for wood and rocks for stone (an axe/pickaxe doubles the yield), search crates and barrels near the roads and abandoned houses for food, water, medicine, and car parts. Keep hunger and thirst up or you'll start losing health. Killing infected earns coins. With wood and stone you can build floors, walls, doors, campfires, and storage boxes anywhere outside the safe zone. Two wrecked cars on the map can be repaired with 1 fuel can, 1 battery, and 2 wheels (driving itself is a stubbed future feature). Nights are dark and the infected see farther and move faster — build a campfire. Progress autosaves to your browser every 25 seconds.
+You spawn in the fenced safe zone — infected never enter it. The trader there buys and sells gear. Hit trees for wood and rocks for stone (an axe/pickaxe doubles the yield), search crates and barrels near the roads and abandoned houses for food, water, medicine, and car parts. Keep hunger and thirst up or you'll start losing health. Killing infected earns coins. With wood and stone you can build floors, walls, doors, campfires, and storage boxes anywhere outside the safe zone. Two wrecked cars on the map can be repaired with 1 fuel can, 1 battery, and 2 wheels (driving itself is a stubbed future feature). Nights are dark and the infected see farther and move faster — build a campfire. Progress autosaves to your browser every 25 seconds. When hosted on Heartbeat Observatory, the game also joins the shared Heartbeat Realtime layer: connected players can see each other's survivor markers and basic actions. If realtime is unavailable, the game falls back to solo play.
 
 ## Local development
 

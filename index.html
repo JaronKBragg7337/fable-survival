@@ -29,6 +29,10 @@
       text-shadow: 0 1px 3px #000; z-index: 10; pointer-events: none; }
     #clock { position: fixed; top: calc(max(8px, env(safe-area-inset-top)) + 22px); right: 10px; color: #fff; font-size: 12px;
       text-shadow: 0 1px 3px #000; z-index: 10; pointer-events: none; opacity:.85; }
+    #mp-chip { position: fixed; top: calc(max(8px, env(safe-area-inset-top)) + 44px); right: 10px; z-index: 10; pointer-events: none;
+      color: #d8f7d0; background: rgba(7,18,10,.58); border: 1px solid rgba(139,213,124,.35); border-right: 3px solid #6fbf58;
+      border-radius: 7px; padding: 5px 8px; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; max-width: min(220px, 48vw);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 2px #000; }
 
     /* ---------- Toast / interact prompt ---------- */
     #toast { position: fixed; top: 18%; left: 50%; transform: translateX(-50%); color: #fff; background: rgba(0,0,0,.65);
@@ -101,6 +105,7 @@
   </div>
   <div id="coins">🪙 0</div>
   <div id="clock">Day 1 08:00</div>
+  <div id="mp-chip">solo</div>
   <div id="toast"></div>
   <div id="prompt"></div>
 

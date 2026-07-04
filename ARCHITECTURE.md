@@ -33,6 +33,14 @@ Zero cost, zero accounts, works offline, good enough for per-device progress.
 A backend only enters the picture if/when multiplayer or leaderboards are
 built (see ROADMAP Milestone 4 — research first).
 
+**How multiplayer is wired now**
+`src/multiplayer.js` uses Heartbeat Observatory's existing Supabase Realtime
+project for presence and state broadcasts. This is separate from Fable's
+cloud-save Supabase project: cloud save owns optional account/save blobs, while
+Heartbeat Realtime owns live player visibility when the game is hosted under the
+Observatory. If the realtime connection fails, the module displays `solo` and
+the normal localStorage singleplayer loop keeps running.
+
 **Why emoji icons and flat-colored low-poly meshes?**
 No texture downloads, no asset pipeline, instant load, and a coherent style
 that hides the absence of AAA art. Visual upgrades should be procedural

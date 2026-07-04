@@ -1,5 +1,32 @@
 # HANDOFF.md — Session Log
 
+## 2026-07-04 — Codex — Heartbeat realtime multiplayer MVP
+
+**State:** working in source. Hosted Heartbeat copy is generated from this repo's
+production build.
+
+**Shipped:** added `src/multiplayer.js`, wired it into `src/main.js`, broadcast
+player attack hints from the attack input path, and broadcast newly placed
+building pieces from `src/building.js`. Added a compact `#mp-chip` to
+`index.html`. Multiplayer uses the existing Heartbeat Observatory Supabase
+Realtime project for presence/state and leaves Fable's separate cloud-save
+Supabase project alone.
+
+**Verified:** `node --check` passed for edited modules. Production build passed
+from a clean temp checkout because this Google Drive checkout's `node_modules`
+folder was corrupted/incomplete for Vite extraction.
+
+**Next up:** two-tab/two-phone playtest from
+`https://www.heartbeatobservatory.com/games/fable-survival/`: both clients
+should enter the world, see the realtime chip, see remote survivor movement,
+and see a placed build piece appear on the other client.
+
+**Gotchas:** this is visibility/co-presence multiplayer, not authoritative
+combat. Enemy ownership, shared base persistence, and anti-cheat/PVP rules are
+still future architecture work.
+
+---
+
 Newest entry goes at the TOP. Every agent session (Cowork, Claude Code, scheduled
 task) adds an entry before ending. This is how sessions with no shared memory
 continue each other's work.

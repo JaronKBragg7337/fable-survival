@@ -65,8 +65,12 @@ must not break the live link. See CLAUDE.md for the full protocol.
       never paste it into chat or commit it. Shipped v0.5.2: create/login/link
       account endpoints, short-lived bearer sessions, and save read/write.
 - [ ] Optional cloud-save client bridge over localStorage (#7) and UI (#8)
-- [ ] Research: WebRTC or lightweight websocket co-op — is it feasible to keep
-      free hosting? Write findings to Research Notes below before building.
+- [x] Heartbeat multiplayer visibility MVP: remote survivors, shared games
+      presence, attack hints, and live build-piece broadcasts over Heartbeat
+      Supabase Realtime. This is not authoritative combat/co-op yet.
+- [ ] Research: authoritative co-op/PVP model for combat, enemy ownership, and
+      shared persistent bases without breaking phone/free-hosting constraints.
+      Write findings to Research Notes below before building.
 - [ ] Daily challenge seed: same world layout for all players that day
 - [ ] Simple leaderboard (days survived) — needs a tiny backend or Vercel KV
 
@@ -101,3 +105,6 @@ must not break the live link. See CLAUDE.md for the full protocol.
 
 - 2026-07-02: Foundation built on Three.js 0.160 / Vite 5. Bundle 131 KB gz.
   Known-good baseline: tag v0.1.0-foundation.
+- 2026-07-04: Heartbeat Observatory already has a proven Supabase Realtime
+  shell. Use presence only for identity and broadcast movement at <=10Hz with
+  idle suppression; do not build a separate websocket stack for visibility.
