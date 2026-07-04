@@ -25,7 +25,8 @@ export class CameraController {
     this.yaw -= d.x;
     this.pitch = Math.max(-1.2, Math.min(1.35, this.pitch + d.y));
 
-    const p = this.player.pos;
+    const v = this.player.inVehicle;
+    const p = v ? v.mesh.position : this.player.pos;
     if (this.firstPerson) {
       this.camera.position.set(p.x, p.y + 1.55, p.z);
       const look = new THREE.Vector3(
@@ -44,7 +45,7 @@ export class CameraController {
       );
       this.camera.position.copy(this._pos);
       this.camera.lookAt(p.x, p.y + 1.3, p.z);
-      this.player.mesh.visible = true;
+      this.player.mesh.visible = !v; // hide player when driving; car has its own mesh
     }
   }
 }
