@@ -2,8 +2,7 @@
 
 ## 2026-07-05 — Codex — multiplayer vehicle visibility + hosted device tier
 
-**State:** remote vehicle visibility shipped at `1d0ee29`; hosted device-tier
-follow-up built locally and ready for commit/push.
+**State:** live verified on standalone and Heartbeat-hosted routes.
 
 **Shipped:** updated `src/multiplayer.js` so local Realtime state includes
 `mode: "vehicle"`, stable `vehicleId`, car position, and car yaw while the
@@ -24,9 +23,14 @@ console warnings/errors appeared. Module smoke confirmed driving state emits
 `mode: "vehicle"`, stable `vehicleId`, car position/yaw, and one broadcast
 payload. Follow-up device-tier check: `node --check src/main.js src/ui.js` and
 clean temp `npm install && npm run build` passed with JS gzip 144.72 KB.
+Standalone deploy poll returned 200 for `/assets/index-Bx8fCYaW.js` with
+`vehicleId` and `rendererPixelRatio`. Standalone live Chrome smoke at
+`https://fable-survival.vercel.app/` rendered one canvas, entered the world,
+displayed the HUD, initialized the Realtime chip, and logged zero
+warnings/errors. Heartbeat hosted live smoke also passed at
+`https://www.heartbeatobservatory.com/games/fable-survival/`.
 
-**Next up:** push/deploy, then verify the live standalone and Heartbeat hosted
-routes.
+**Next up:** durable shared bases/parked vehicles need a schema-backed pass.
 
 **Gotchas:** this makes other players see driven vehicles live. It does not yet
 make parked vehicles or bases durable/shared after reload. Use Heartbeat
