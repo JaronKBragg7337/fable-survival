@@ -9,7 +9,7 @@ import { PIECES } from './building.js';
 import { TRADER_STOCK } from './trader.js';
 
 // bump when shipping notable changes; included in feedback reports
-export const GAME_VERSION = '0.6.0';
+export const GAME_VERSION = '0.6.1';
 
 // Short survival tips shown on death so a loss teaches something (issue #15).
 // Keep every line factually true to the mechanics — players learn from these.

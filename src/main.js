@@ -20,6 +20,7 @@ import { Trader } from './trader.js';
 import { Vehicles } from './vehicles.js';
 import { DayNight } from './daynight.js';
 import { SaveSystem } from './save.js';
+import { CloudSave } from './cloudSave.js';
 import { UI } from './ui.js';
 import { Pickups } from './pickups.js';
 import { Multiplayer } from './multiplayer.js';
@@ -64,6 +65,7 @@ game.dayNight = new DayNight(game);
 game.save = new SaveSystem(game);
 game.ui = new UI(game);
 game.multiplayer = new Multiplayer(game);
+game.cloudSave = new CloudSave(game);
 
 // starter kit for new survivors
 if (!game.save.load()) {
@@ -71,6 +73,7 @@ if (!game.save.load()) {
   game.inventory.add('water', 1);
   game.inventory.add('bandage', 2);
 }
+game.cloudSave.boot();
 
 // ---------- input wiring ----------
 game.input.on('interact', () => {
@@ -121,6 +124,7 @@ function loop() {
       game.dayNight.update(dt);
       game.stats.update(dt, game.player.sprinting);
       game.save.update(dt);
+      game.cloudSave.update(dt);
       game.multiplayer.update(dt);
       findNearInteractable();
     }

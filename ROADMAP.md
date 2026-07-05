@@ -64,7 +64,10 @@ must not break the live link. See CLAUDE.md for the full protocol.
       `SUPABASE_SECRET_KEY` (#6). Requires owner to add the secret key in Vercel;
       never paste it into chat or commit it. Shipped v0.5.2: create/login/link
       account endpoints, short-lived bearer sessions, and save read/write.
-- [ ] Optional cloud-save client bridge over localStorage (#7) and UI (#8)
+- [x] Optional cloud-save client bridge over localStorage (#7): dormant until
+      opt-in/session keys exist, localStorage remains source of truth, async
+      pull + debounced PUT `/api/save`, prompt-before-reconcile on divergence.
+- [ ] Cloud-save UI (#8): enable/link/login flow + play-on-another-device code
 - [x] Heartbeat multiplayer visibility MVP: remote survivors, shared games
       presence, attack hints, and live build-piece broadcasts over Heartbeat
       Supabase Realtime. This is not authoritative combat/co-op yet.

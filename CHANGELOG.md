@@ -2,6 +2,16 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.6.1 — 2026-07-05
+
+- Added optional cloud-save client bridge (#7) layered over the existing
+  localStorage save system. The bridge stays dormant unless a future UI opts in
+  and stores a session token, so current players still start and autosave
+  locally exactly as before.
+- Added async cloud pull, debounced `PUT /api/save` after local saves, bearer
+  session handling, cloud/local divergence prompts, and metadata tracking.
+  Network failures log and continue on local play.
+
 ## v0.6.0 — 2026-07-04
 
 - Added Heartbeat Observatory multiplayer visibility MVP using the existing

@@ -1,5 +1,39 @@
 # HANDOFF.md — Session Log
 
+## 2026-07-05 — Codex — #7 cloud-save client bridge
+
+**State:** working in source. The bridge is dormant for current players until a
+future UI stores both `fable_cloud_opt_in_v1=1` and a
+`fable_cloud_session_v1` bearer session.
+
+**Shipped:** added `src/cloudSave.js`, wired it into `src/main.js`, and
+factored `src/save.js` into `snapshot()`, `readLocal()`, `writeLocal()`, and
+`apply()` so cloud transport uses the real serializer instead of duplicating
+save shape. LocalStorage remains the on-device source of truth. Startup still
+loads local immediately; cloud pull is async/best-effort. Local saves call
+`cloudSave.onLocalSave()` after the local write, which debounces `PUT /api/save`
+only when opt-in + session are present. Divergent cloud/local saves prompt
+before applying cloud or uploading local.
+
+**Verified:** `node --check src/save.js src/cloudSave.js src/main.js`; clean
+temp copy build passed (`npm install`, `npm run build`) with 24 modules and JS
+gzip 142.61 KB. Production dist smoke on `http://127.0.0.1:5187/` with no
+cloud opt-in: one canvas, start screen enters, HP 100%, zero console/page
+errors, zero `/api/save` or `/api/account` requests. Mocked active-path browser
+smoke: opt-in + fake session produced `GET /api/save` with bearer token; manual
+save debounced a `PUT /api/save` with the real save blob, save version,
+`client_version: 0.6.1`, and device label; metadata updated.
+
+**Next up:** #8 cloud-save UI: account/link/login controls and a clear
+"play on another device" code flow.
+
+**Gotchas:** `npm install && npm run build` timed out in the Google Drive
+checkout, matching the known Drive/node_modules issue. Verification used a
+clean temp copy excluding `.git`, `node_modules`, `dist`, and `.vercel`. The
+existing Vite/esbuild audit findings remain tracked separately as #18.
+
+---
+
 ## 2026-07-04 — Codex — Heartbeat realtime multiplayer MVP
 
 **State:** working in source. Hosted Heartbeat copy is generated from this repo's

@@ -14,20 +14,48 @@ export class SaveSystem {
     this.timer = AUTOSAVE;
   }
 
+  snapshot() {
+    const g = this.game;
+    return {
+      v: 1,
+      stats: g.stats.toJSON(),
+      inv: g.inventory.toJSON(),
+      coins: g.coins,
+      pos: { x: g.player.pos.x, z: g.player.pos.z },
+      dayNight: g.dayNight.toJSON(),
+      buildings: g.buildings.toJSON(),
+      vehicles: g.vehicles.toJSON()
+    };
+  }
+
+  writeLocal(data) {
+    localStorage.setItem(KEY, JSON.stringify(data));
+  }
+
+  readLocal() {
+    const raw = localStorage.getItem(KEY);
+    return raw ? JSON.parse(raw) : null;
+  }
+
+  apply(data) {
+    const g = this.game;
+    if (!data || typeof data !== 'object') return false;
+    if (data.stats) g.stats.fromJSON(data.stats);
+    if (data.inv) g.inventory.fromJSON(data.inv);
+    if (typeof data.coins === 'number') g.coins = data.coins;
+    if (data.pos) { g.player.pos.x = data.pos.x; g.player.pos.z = data.pos.z; }
+    g.dayNight.fromJSON(data.dayNight);
+    g.buildings.fromJSON(data.buildings);
+    g.vehicles.fromJSON(data.vehicles);
+    return true;
+  }
+
   save(quiet = false) {
     const g = this.game;
     try {
-      const data = {
-        v: 1,
-        stats: g.stats.toJSON(),
-        inv: g.inventory.toJSON(),
-        coins: g.coins,
-        pos: { x: g.player.pos.x, z: g.player.pos.z },
-        dayNight: g.dayNight.toJSON(),
-        buildings: g.buildings.toJSON(),
-        vehicles: g.vehicles.toJSON()
-      };
-      localStorage.setItem(KEY, JSON.stringify(data));
+      const data = this.snapshot();
+      this.writeLocal(data);
+      try { g.cloudSave?.onLocalSave(data); } catch { /* cloud save is best-effort */ }
       if (!quiet) g.ui.toast('💾 Game saved');
     } catch (e) {
       if (!quiet) g.ui.toast('Save failed (storage unavailable).');
@@ -35,19 +63,9 @@ export class SaveSystem {
   }
 
   load() {
-    const g = this.game;
     try {
-      const raw = localStorage.getItem(KEY);
-      if (!raw) return false;
-      const d = JSON.parse(raw);
-      if (d.stats) g.stats.fromJSON(d.stats);
-      if (d.inv) g.inventory.fromJSON(d.inv);
-      if (typeof d.coins === 'number') g.coins = d.coins;
-      if (d.pos) { g.player.pos.x = d.pos.x; g.player.pos.z = d.pos.z; }
-      g.dayNight.fromJSON(d.dayNight);
-      g.buildings.fromJSON(d.buildings);
-      g.vehicles.fromJSON(d.vehicles);
-      return true;
+      const data = this.readLocal();
+      return this.apply(data);
     } catch (e) {
       return false;
     }
