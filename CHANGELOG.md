@@ -2,6 +2,12 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.6.4 — 2026-07-05
+
+- Hosted builds now use Heartbeat Observatory's `HBDevice` renderer pixel-ratio
+  cap when the site shell provides it, while standalone builds keep the existing
+  `Math.min(devicePixelRatio, 2)` fallback.
+
 ## v0.6.3 — 2026-07-05
 
 - Multiplayer now shows repaired cars while another connected survivor is

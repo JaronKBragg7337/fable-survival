@@ -1,8 +1,9 @@
 # HANDOFF.md — Session Log
 
-## 2026-07-05 — Codex — multiplayer vehicle visibility
+## 2026-07-05 — Codex — multiplayer vehicle visibility + hosted device tier
 
-**State:** working in source; ready for commit/push after final diff review.
+**State:** remote vehicle visibility shipped at `1d0ee29`; hosted device-tier
+follow-up built locally and ready for commit/push.
 
 **Shipped:** updated `src/multiplayer.js` so local Realtime state includes
 `mode: "vehicle"`, stable `vehicleId`, car position, and car yaw while the
@@ -10,6 +11,9 @@ player is driving. Remote peers now render a compact vehicle mesh and hide the
 walking survivor mesh during that mode, with the same interpolation buffer as
 survivor movement. `src/vehicles.js` forces an immediate multiplayer state
 packet on car enter/exit. `GAME_VERSION` is now `0.6.3`.
+Follow-up: `src/main.js` now uses `window.HBDevice?.rendererPixelRatio(2, 1.5,
+1.15)` when the Heartbeat shell provides it, with the old `Math.min(devicePixelRatio, 2)`
+fallback for standalone hosting. `GAME_VERSION` is now `0.6.4`.
 
 **Verified:** `node --check src/multiplayer.js src/vehicles.js src/ui.js`;
 `git diff --check`; clean temp `npm install && npm run build` passed with 25
@@ -18,7 +22,8 @@ modules and JS gzip 144.70 KB. Production-dist browser smoke on
 Realtime chip initialized (`realtime · alone here · 4 in games`), and no
 console warnings/errors appeared. Module smoke confirmed driving state emits
 `mode: "vehicle"`, stable `vehicleId`, car position/yaw, and one broadcast
-payload.
+payload. Follow-up device-tier check: `node --check src/main.js src/ui.js` and
+clean temp `npm install && npm run build` passed with JS gzip 144.72 KB.
 
 **Next up:** push/deploy, then verify the live standalone and Heartbeat hosted
 routes.
