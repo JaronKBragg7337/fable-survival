@@ -224,15 +224,21 @@ export class Multiplayer {
 
   localState() {
     const p = this.game.player;
+    const vehicle = p.inVehicle || this.game.vehicles?.activeVehicle || null;
+    const driving = !!(vehicle && vehicle.mesh);
+    const pos = driving ? vehicle.mesh.position : p.pos;
+    const yaw = driving ? vehicle.mesh.rotation.y : p.mesh.rotation.y;
     return {
       id: this.id,
       name: this.name,
       color: this.color,
       game: 'fable-survival',
-      x: p.pos.x,
-      y: p.pos.y,
-      z: p.pos.z,
-      yaw: p.mesh.rotation.y,
+      mode: driving ? 'vehicle' : 'foot',
+      vehicleId: driving ? String(vehicle.id || 'vehicle') : '',
+      x: pos.x,
+      y: pos.y,
+      z: pos.z,
+      yaw,
       moving: !!p.moving,
       sprinting: !!p.sprinting,
       dead: !!this.game.stats.dead,
@@ -249,6 +255,8 @@ export class Multiplayer {
       state.y.toFixed(2),
       state.z.toFixed(2),
       state.yaw.toFixed(2),
+      state.mode || 'foot',
+      state.vehicleId || '',
       state.moving ? 1 : 0,
       state.sprinting ? 1 : 0,
       state.dead ? 1 : 0,
@@ -273,6 +281,8 @@ export class Multiplayer {
     }
     const now = performance.now();
     remote.name = sanitize(state.name) || remote.name;
+    remote.mode = state.mode === 'vehicle' ? 'vehicle' : 'foot';
+    remote.vehicleId = sanitize(state.vehicleId) || '';
     remote.target.set(state.x, state.y, state.z);
     remote.targetYaw = Number.isFinite(state.yaw) ? state.yaw : remote.targetYaw;
     remote.targetScaleY = state.dead ? 0.18 : 1;
@@ -284,6 +294,7 @@ export class Multiplayer {
       y: state.y,
       z: state.z,
       yaw: remote.targetYaw,
+      mode: remote.mode,
       dead: !!state.dead,
       action: remote.action
     });
@@ -333,6 +344,7 @@ export class Multiplayer {
           buf.splice(0, buf.length - 1);
           remote.mesh.position.set(b.x, b.y, b.z);
           remote.mesh.rotation.y = b.yaw;
+          remote.mode = b.mode === 'vehicle' ? 'vehicle' : 'foot';
         } else {
           const span = Math.max(1, b.t - a.t);
           const k = Math.max(0, Math.min(1, (renderT - a.t) / span));
@@ -342,15 +354,21 @@ export class Multiplayer {
             a.z + (b.z - a.z) * k
           );
           remote.mesh.rotation.y = lerpAngle(a.yaw, b.yaw, k);
+          remote.mode = (k > 0.5 ? b.mode : a.mode) === 'vehicle' ? 'vehicle' : 'foot';
         }
       } else if (buf.length) {
         const latest = buf[buf.length - 1];
         remote.target.set(latest.x, latest.y, latest.z);
         remote.targetYaw = latest.yaw;
+        remote.mode = latest.mode === 'vehicle' ? 'vehicle' : 'foot';
         remote.mesh.position.lerp(remote.target, blend);
         remote.mesh.rotation.y = lerpAngle(remote.mesh.rotation.y, remote.targetYaw, blend);
       }
-      remote.mesh.scale.y += (remote.targetScaleY - remote.mesh.scale.y) * blend;
+      const driving = remote.mode === 'vehicle';
+      if (remote.survivor) remote.survivor.visible = !driving;
+      if (remote.vehicle) remote.vehicle.visible = driving;
+      remote.survivorScale.y += (remote.targetScaleY - remote.survivorScale.y) * blend;
+      if (remote.survivor) remote.survivor.scale.y = remote.survivorScale.y;
       animateRemote(remote);
     }
   }
@@ -379,15 +397,25 @@ export class Multiplayer {
 }
 
 function createRemote(scene, state) {
-  const mesh = buildSurvivor(state.color, sanitize(state.name) || 'Survivor');
+  const mesh = new THREE.Group();
+  const survivor = buildSurvivor(state.color, sanitize(state.name) || 'Survivor');
+  const vehicle = buildRemoteVehicle(state.color);
+  vehicle.visible = state.mode === 'vehicle';
+  survivor.visible = state.mode !== 'vehicle';
+  mesh.add(survivor, vehicle);
   mesh.position.set(state.x || 0, state.y || 0, state.z || 0);
   mesh.rotation.y = state.yaw || 0;
   scene.add(mesh);
   return {
     mesh,
+    survivor,
+    vehicle,
+    survivorScale: new THREE.Vector3(1, 1, 1),
     target: mesh.position.clone(),
     targetYaw: mesh.rotation.y,
     targetScaleY: 1,
+    mode: state.mode === 'vehicle' ? 'vehicle' : 'foot',
+    vehicleId: sanitize(state.vehicleId) || '',
     name: sanitize(state.name) || 'Survivor',
     lastUpdate: performance.now(),
     action: '',
@@ -423,7 +451,29 @@ function buildSurvivor(colorHex, name) {
 function animateRemote(remote) {
   const t = performance.now();
   const swing = remote.action === 'attack' ? Math.sin(t * 0.04) * 1.35 : 0;
-  if (remote.mesh.userData.armR) remote.mesh.userData.armR.rotation.x = -Math.abs(swing);
+  if (remote.survivor?.userData?.armR) remote.survivor.userData.armR.rotation.x = -Math.abs(swing);
+}
+
+function buildRemoteVehicle(colorHex) {
+  const g = new THREE.Group();
+  const color = new THREE.Color(colorHex || '#4fa3ff');
+  const mat = (c) => new THREE.MeshLambertMaterial({ color: c });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.9, 1.7), mat(color));
+  body.position.y = 0.75;
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.7, 1.35), mat(0xd7e2ea));
+  cabin.position.set(-0.25, 1.55, 0);
+  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.18, 1.25), mat(0xf0d461));
+  nose.position.set(1.98, 1.03, 0);
+  const wheelGeo = new THREE.CylinderGeometry(0.36, 0.36, 0.24, 10);
+  const wheelMat = mat(0x1d2026);
+  for (const [x, y, z] of [[-1.15, 0.38, 0.88], [-1.15, 0.38, -0.88], [1.18, 0.38, 0.88], [1.18, 0.38, -0.88]]) {
+    const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+    wheel.rotation.x = Math.PI / 2;
+    wheel.position.set(x, y, z);
+    g.add(wheel);
+  }
+  g.add(body, cabin, nose);
+  return g;
 }
 
 function makeNameSprite(name) {

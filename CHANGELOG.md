@@ -2,6 +2,18 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.6.3 — 2026-07-05
+
+- Multiplayer now shows repaired cars while another connected survivor is
+  driving. Vehicle drivers broadcast `vehicle` mode, stable wreck id, car
+  position, and car yaw through the existing Heartbeat Realtime state channel;
+  remote clients hide the walking survivor mesh and interpolate a small car
+  marker instead.
+- Entering and exiting a car forces an immediate state packet so connected
+  players see the switch without waiting for the normal movement tick.
+- This is still visibility multiplayer, not authoritative vehicle physics or
+  persistent shared parking.
+
 ## v0.6.2 — 2026-07-05
 
 - Added cloud-save UI (#8): a top-right cloud panel for create, login, recovery

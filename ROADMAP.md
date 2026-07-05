@@ -43,7 +43,7 @@ must not break the live link. See CLAUDE.md for the full protocol.
 
 ## Milestone 3 — Deeper Survival
 
-- [ ] Driving: make repaired cars actually drive (vehicles.js has the stub notes)
+- [x] Driving: repaired cars can be entered and driven with keyboard/touch
 - [ ] Crafting menu: planks→walls discount, bandage from cloth, torch
 - [ ] Weapons: bat/spear from crafting, ranged slingshot (pooled projectiles)
 - [ ] Cooking on campfires: raw→cooked food, better hunger restore
@@ -72,9 +72,16 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - [x] Heartbeat multiplayer visibility MVP: remote survivors, shared games
       presence, attack hints, and live build-piece broadcasts over Heartbeat
       Supabase Realtime. This is not authoritative combat/co-op yet.
+- [x] Remote vehicle visibility: connected survivors driving repaired cars
+      broadcast vehicle mode/id/position/yaw and render as moving cars for
+      other players over the existing Heartbeat Realtime state channel.
 - [ ] Research: authoritative co-op/PVP model for combat, enemy ownership, and
       shared persistent bases without breaking phone/free-hosting constraints.
       Write findings to Research Notes below before building.
+- [ ] Durable shared bases and parked vehicles: adapt Heartbeat Observatory's
+      `world_props` pattern (DB write + broadcast + periodic reconcile) so
+      placed structures and owned vehicle locations survive reloads for all
+      players, instead of only appearing to clients connected at placement time.
 - [ ] Daily challenge seed: same world layout for all players that day
 - [ ] Simple leaderboard (days survived) — needs a tiny backend or Vercel KV
 
@@ -112,3 +119,8 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - 2026-07-04: Heartbeat Observatory already has a proven Supabase Realtime
   shell. Use presence only for identity and broadcast movement at <=10Hz with
   idle suppression; do not build a separate websocket stack for visibility.
+- 2026-07-05: Heartbeat Observatory's Town Square uses durable `world_props`
+  rows plus `place_prop` / `remove_prop` RPCs, immediate Realtime broadcast,
+  and a periodic reconcile fetch because `postgres_changes` alone was not
+  reliable enough. Fable and SYL can reuse that architecture for persistent
+  shared bases/owned vehicles after a deliberate schema/migration pass.

@@ -15,7 +15,7 @@ Original standalone deployment: https://fable-survival.vercel.app
 
 ## How to play
 
-You spawn in the fenced safe zone — infected never enter it. The trader there buys and sells gear. Hit trees for wood and rocks for stone (an axe/pickaxe doubles the yield), search crates and barrels near the roads and abandoned houses for food, water, medicine, and car parts. Keep hunger and thirst up or you'll start losing health. Killing infected earns coins. With wood and stone you can build floors, walls, doors, campfires, and storage boxes anywhere outside the safe zone. Two wrecked cars on the map can be repaired with 1 fuel can, 1 battery, and 2 wheels (driving itself is a stubbed future feature). Nights are dark and the infected see farther and move faster — build a campfire. Progress autosaves to your browser every 25 seconds. The ☁ panel can optionally create/login/link a cloud-save account for cross-device play; local saves continue working without it. When hosted on Heartbeat Observatory, the game also joins the shared Heartbeat Realtime layer: connected players can see each other's survivor markers and basic actions. If realtime is unavailable, the game falls back to solo play.
+You spawn in the fenced safe zone — infected never enter it. The trader there buys and sells gear. Hit trees for wood and rocks for stone (an axe/pickaxe doubles the yield), search crates and barrels near the roads and abandoned houses for food, water, medicine, and car parts. Keep hunger and thirst up or you'll start losing health. Killing infected earns coins. With wood and stone you can build floors, walls, doors, campfires, and storage boxes anywhere outside the safe zone. Two wrecked cars on the map can be repaired with 1 fuel can, 1 battery, and 2 wheels, then driven with WASD or the touch stick. Nights are dark and the infected see farther and move faster — build a campfire. Progress autosaves to your browser every 25 seconds. The ☁ panel can optionally create/login/link a cloud-save account for cross-device play; local saves continue working without it. When hosted on Heartbeat Observatory, the game also joins the shared Heartbeat Realtime layer: connected players can see each other's survivor markers, basic actions, live build placements, and driven vehicles. If realtime is unavailable, the game falls back to solo play.
 
 ## Local development
 
@@ -51,7 +51,7 @@ Each system lives in its own module under `src/` with a header comment explainin
 | `building.js` | ghost placement, floors/walls/doors/campfire/storage |
 | `enemies.js` | pooled infected with wander/chase/attack/return AI |
 | `trader.js` | safe-zone buy/sell economy |
-| `vehicles.js` | wrecks + part-installation repair stub |
+| `vehicles.js` | repairable wrecks + driving |
 | `stats.js` | health/stamina/hunger/thirst |
 | `daynight.js` | sun cycle, sky/fog, night danger flag |
 | `save.js` | localStorage save/load + autosave |
@@ -61,4 +61,4 @@ Performance choices for phones: instanced meshes for trees/rocks/fence, emoji "i
 
 ## Known limitations
 
-Dropped pickups are runtime-only and do not persist across reloads yet; driving is stubbed (repair works, driving "coming soon"); zombies path straight at you and can snag on obstacles; death keeps your inventory (prototype-friendly); saves are per-browser/per-device; houses are axis-aligned; no audio yet.
+Dropped pickups are runtime-only and do not persist across reloads yet; multiplayer is visibility/co-presence rather than authoritative co-op combat; zombies path straight at you and can snag on obstacles; death keeps your inventory (prototype-friendly); saves are per-browser/per-device unless optional cloud save is connected; houses are axis-aligned; no audio yet.

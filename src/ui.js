@@ -16,7 +16,7 @@ import {
 } from './cloudKeys.js';
 
 // bump when shipping notable changes; included in feedback reports
-export const GAME_VERSION = '0.6.2';
+export const GAME_VERSION = '0.6.3';
 
 // Short survival tips shown on death so a loss teaches something (issue #15).
 // Keep every line factually true to the mechanics — players learn from these.

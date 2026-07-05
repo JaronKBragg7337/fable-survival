@@ -1,5 +1,35 @@
 # HANDOFF.md — Session Log
 
+## 2026-07-05 — Codex — multiplayer vehicle visibility
+
+**State:** working in source; ready for commit/push after final diff review.
+
+**Shipped:** updated `src/multiplayer.js` so local Realtime state includes
+`mode: "vehicle"`, stable `vehicleId`, car position, and car yaw while the
+player is driving. Remote peers now render a compact vehicle mesh and hide the
+walking survivor mesh during that mode, with the same interpolation buffer as
+survivor movement. `src/vehicles.js` forces an immediate multiplayer state
+packet on car enter/exit. `GAME_VERSION` is now `0.6.3`.
+
+**Verified:** `node --check src/multiplayer.js src/vehicles.js src/ui.js`;
+`git diff --check`; clean temp `npm install && npm run build` passed with 25
+modules and JS gzip 144.70 KB. Production-dist browser smoke on
+`http://127.0.0.1:5198/`: canvas rendered, start screen entered, HUD displayed,
+Realtime chip initialized (`realtime · alone here · 4 in games`), and no
+console warnings/errors appeared. Module smoke confirmed driving state emits
+`mode: "vehicle"`, stable `vehicleId`, car position/yaw, and one broadcast
+payload.
+
+**Next up:** push/deploy, then verify the live standalone and Heartbeat hosted
+routes.
+
+**Gotchas:** this makes other players see driven vehicles live. It does not yet
+make parked vehicles or bases durable/shared after reload. Use Heartbeat
+Observatory's `world_props` + broadcast + reconcile pattern for that later
+schema-backed pass.
+
+---
+
 ## 2026-07-05 — Codex — #8 cloud-save UI
 
 **State:** working in source; ready for commit after final diff review. The

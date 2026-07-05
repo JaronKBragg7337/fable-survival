@@ -101,6 +101,7 @@ export class Vehicles {
     p.mesh.visible = false;
     this.game.ui.toast('🚗 Driving — WASD / stick to drive, E / USE to exit');
     this.game.ui.closeAll();
+    this.game.multiplayer?.sendState(true);
   }
 
   exitVehicle(v) {
@@ -114,6 +115,7 @@ export class Vehicles {
     p.pos.set(v.mesh.position.x + Math.sin(exitAngle) * CAR_EXIT_DIST, 0, v.mesh.position.z + Math.cos(exitAngle) * CAR_EXIT_DIST);
     p.mesh.visible = true;
     this.game.ui.toast('Exited car');
+    this.game.multiplayer?.sendState(true);
   }
 
   update(dt) {
