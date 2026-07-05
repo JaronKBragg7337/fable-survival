@@ -32,6 +32,7 @@ export class Multiplayer {
     this.sendAccumulator = 0;
     this.lastSentSig = '';
     this.lastSentAt = 0;
+    this.lastBuildSnapshotAt = new Map();
     this.reconnectTimer = null;
     this.action = '';
     this.actionUntil = 0;
@@ -85,6 +86,7 @@ export class Multiplayer {
     });
     this.channel.on('broadcast', { event: 'state' }, ({ payload }) => this.applyPeerState(payload));
     this.channel.on('broadcast', { event: 'build' }, ({ payload }) => this.applyBuildEvent(payload));
+    this.channel.on('broadcast', { event: 'build-snapshot' }, ({ payload }) => this.applyBuildSnapshot(payload));
     this.channel.on('presence', { event: 'sync' }, () => this.syncPresence());
     this.channel.on('presence', { event: 'leave' }, ({ leftPresences }) => {
       for (const p of leftPresences || []) {
@@ -98,6 +100,7 @@ export class Multiplayer {
         this.connected = true;
         this.trackSelf();
         this.sendState(true);
+        this.broadcastBuildSnapshot();
         this.updateChip();
       } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
         this.connected = false;
@@ -195,10 +198,49 @@ export class Multiplayer {
     } catch (e) {}
   }
 
+  broadcastBuildSnapshot(toId = '') {
+    if (!this.connected || !this.channel || !this.game.buildings?.placed?.length) return;
+    const key = toId || '*';
+    const now = performance.now();
+    const last = this.lastBuildSnapshotAt.get(key);
+    if (last && now - last < 4000) return;
+    this.lastBuildSnapshotAt.set(key, now);
+    const records = this.game.buildings.placed
+      .slice(0, 120)
+      .map((rec) => ({
+        piece: rec.piece,
+        x: rec.x,
+        z: rec.z,
+        rotY: rec.rotY,
+        open: !!rec.open
+      }));
+    try {
+      this.channel.send({
+        type: 'broadcast',
+        event: 'build-snapshot',
+        payload: { id: this.id, to: toId || '', records }
+      });
+    } catch (e) {}
+  }
+
   applyBuildEvent(payload) {
     if (!payload || payload.id === this.id || !payload.rec || !this.game.buildings) return;
-    const r = payload.rec;
-    if (!r.piece || !Number.isFinite(r.x) || !Number.isFinite(r.z)) return;
+    if (this.applyBuildRecord(payload.rec)) this.game.ui.toast('A survivor built nearby.');
+  }
+
+  applyBuildSnapshot(payload) {
+    if (!payload || payload.id === this.id || !this.game.buildings) return;
+    if (payload.to && payload.to !== this.id) return;
+    const records = Array.isArray(payload.records) ? payload.records.slice(0, 120) : [];
+    let added = 0;
+    for (const rec of records) {
+      if (this.applyBuildRecord(rec)) added++;
+    }
+    if (added) this.game.ui.toast(`A survivor shared ${added} build ${added === 1 ? 'piece' : 'pieces'}.`);
+  }
+
+  applyBuildRecord(r) {
+    if (!r || !r.piece || !Number.isFinite(r.x) || !Number.isFinite(r.z)) return false;
     const exists = this.game.buildings.placed.some((p) =>
       p.piece === r.piece && Math.abs(p.x - r.x) < 0.01 && Math.abs(p.z - r.z) < 0.01
     );
@@ -211,8 +253,9 @@ export class Multiplayer {
         open: !!r.open,
         remote: true
       });
-      this.game.ui.toast('A survivor built nearby.');
+      return true;
     }
+    return false;
   }
 
   update(dt) {
@@ -277,6 +320,7 @@ export class Multiplayer {
     if (!remote) {
       remote = createRemote(this.game.scene, state);
       this.remotes.set(state.id, remote);
+      this.broadcastBuildSnapshot(state.id);
       this.updateChip();
     }
     const now = performance.now();

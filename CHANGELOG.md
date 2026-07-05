@@ -2,6 +2,15 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.6.5 — 2026-07-05
+
+- Multiplayer build sharing now sends a bounded build snapshot when connected
+  peers meet. If you join after another online survivor already placed walls,
+  floors, doors, campfires, or storage, their client shares those current
+  pieces so you see the base without waiting for the next placement.
+- Snapshot records are capped, duplicate-checked, and live-only. True durable
+  shared bases still need the planned schema-backed object store.
+
 ## v0.6.4 — 2026-07-05
 
 - Hosted builds now use Heartbeat Observatory's `HBDevice` renderer pixel-ratio

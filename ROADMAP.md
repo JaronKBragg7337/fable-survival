@@ -75,6 +75,9 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - [x] Remote vehicle visibility: connected survivors driving repaired cars
       broadcast vehicle mode/id/position/yaw and render as moving cars for
       other players over the existing Heartbeat Realtime state channel.
+- [x] Build snapshot sync: connected clients share a bounded snapshot of
+      already-placed pieces with late-joining peers, so current online bases are
+      visible before the next placement.
 - [ ] Research: authoritative co-op/PVP model for combat, enemy ownership, and
       shared persistent bases without breaking phone/free-hosting constraints.
       Write findings to Research Notes below before building.

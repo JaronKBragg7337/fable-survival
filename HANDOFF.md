@@ -1,5 +1,35 @@
 # HANDOFF.md — Session Log
 
+## 2026-07-05 — Codex — multiplayer build snapshot sync
+
+**State:** local verification passed; ready for commit/push.
+
+**Shipped:** extended `src/multiplayer.js` with a `build-snapshot` Realtime
+broadcast. On subscribe and when a new peer first sends state, a client with
+placed build pieces sends up to 120 current records to that peer. Receivers
+apply only records addressed to them (or broadcast to all), reuse the existing
+duplicate check, and instantiate missing walls/floors/doors/campfires/storage.
+`GAME_VERSION` is now `0.6.5`.
+
+**Verified:** `node --check src/multiplayer.js src/ui.js`; `git diff --check`;
+clean temp `npm install`; module smoke confirmed one addressed
+`build-snapshot` send, two records applied once, duplicate snapshot ignored,
+and wrong-target snapshot ignored; clean temp `npm run build` passed with 25
+modules and JS gzip 144.96 KB. Production-dist Chrome smoke on
+`http://127.0.0.1:5201/`: served `assets/index-BV92Sd35.js`, rendered one
+canvas, entered the world, displayed HUD, initialized the Realtime chip, and
+logged zero warnings/errors.
+
+**Next up:** push/sync Heartbeat and verify live.
+
+**Gotchas:** this improves late-join visibility while at least one builder is
+online. It is not durable after every client leaves. Durable shared bases and
+parked vehicles still need a schema-backed object table with a game/world
+namespace; the current Heartbeat `world_props` path is Town Square scoped and
+selects all rows without a namespace.
+
+---
+
 ## 2026-07-05 — Codex — multiplayer vehicle visibility + hosted device tier
 
 **State:** live verified on standalone and Heartbeat-hosted routes.
