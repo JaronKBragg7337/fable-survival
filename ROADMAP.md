@@ -67,7 +67,8 @@ must not break the live link. See CLAUDE.md for the full protocol.
 - [x] Optional cloud-save client bridge over localStorage (#7): dormant until
       opt-in/session keys exist, localStorage remains source of truth, async
       pull + debounced PUT `/api/save`, prompt-before-reconcile on divergence.
-- [ ] Cloud-save UI (#8): enable/link/login flow + play-on-another-device code
+- [x] Cloud-save UI (#8): optional cloud panel with create, login, recovery-code
+      link, manual upload, disconnect, and recovery-code copy.
 - [x] Heartbeat multiplayer visibility MVP: remote survivors, shared games
       presence, attack hints, and live build-piece broadcasts over Heartbeat
       Supabase Realtime. This is not authoritative combat/co-op yet.

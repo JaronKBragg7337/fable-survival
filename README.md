@@ -9,13 +9,13 @@ Original standalone deployment: https://fable-survival.vercel.app
 
 ## Controls
 
-**Phone:** left virtual stick = move (push to the edge to sprint), drag the right side of the screen = look around, USE = interact/place buildings, HIT = attack/chop/mine (also cancels building placement), JMP = jump. Top-right buttons: 🎒 inventory, 🔨 build menu, 👁 first/third-person toggle, 💾 save.
+**Phone:** left virtual stick = move (push to the edge to sprint), drag the right side of the screen = look around, USE = interact/place buildings, HIT = attack/chop/mine (also cancels building placement), JMP = jump. Top-right buttons: 🎒 inventory, 🔨 build menu, 👁 first/third-person toggle, 💾 save, ☁ optional cloud save.
 
 **Desktop:** WASD move, Shift sprint, click the game once to lock the mouse for looking, click = attack/chop, E = interact, I or Tab = inventory, B = build menu, V = camera toggle, Space = jump, Esc = close menus.
 
 ## How to play
 
-You spawn in the fenced safe zone — infected never enter it. The trader there buys and sells gear. Hit trees for wood and rocks for stone (an axe/pickaxe doubles the yield), search crates and barrels near the roads and abandoned houses for food, water, medicine, and car parts. Keep hunger and thirst up or you'll start losing health. Killing infected earns coins. With wood and stone you can build floors, walls, doors, campfires, and storage boxes anywhere outside the safe zone. Two wrecked cars on the map can be repaired with 1 fuel can, 1 battery, and 2 wheels (driving itself is a stubbed future feature). Nights are dark and the infected see farther and move faster — build a campfire. Progress autosaves to your browser every 25 seconds. When hosted on Heartbeat Observatory, the game also joins the shared Heartbeat Realtime layer: connected players can see each other's survivor markers and basic actions. If realtime is unavailable, the game falls back to solo play.
+You spawn in the fenced safe zone — infected never enter it. The trader there buys and sells gear. Hit trees for wood and rocks for stone (an axe/pickaxe doubles the yield), search crates and barrels near the roads and abandoned houses for food, water, medicine, and car parts. Keep hunger and thirst up or you'll start losing health. Killing infected earns coins. With wood and stone you can build floors, walls, doors, campfires, and storage boxes anywhere outside the safe zone. Two wrecked cars on the map can be repaired with 1 fuel can, 1 battery, and 2 wheels (driving itself is a stubbed future feature). Nights are dark and the infected see farther and move faster — build a campfire. Progress autosaves to your browser every 25 seconds. The ☁ panel can optionally create/login/link a cloud-save account for cross-device play; local saves continue working without it. When hosted on Heartbeat Observatory, the game also joins the shared Heartbeat Realtime layer: connected players can see each other's survivor markers and basic actions. If realtime is unavailable, the game falls back to solo play.
 
 ## Local development
 

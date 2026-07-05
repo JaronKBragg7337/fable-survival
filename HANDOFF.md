@@ -1,5 +1,37 @@
 # HANDOFF.md — Session Log
 
+## 2026-07-05 — Codex — #8 cloud-save UI
+
+**State:** working in source; ready for commit after final diff review. The
+cloud panel is optional and local saves still work without an account.
+
+**Shipped:** added a top-right ☁ panel for create, login, recovery-code link,
+manual upload, disconnect, and recovery-code copy. Added shared
+`src/cloudKeys.js` so the panel and `src/cloudSave.js` use the same localStorage
+keys. `CloudSave.connect()` stores opt-in/session and starts the existing
+best-effort pull/upload bridge; `CloudSave.disconnect()` clears the bearer
+session without deleting the local save. `GAME_VERSION` is now `0.6.2`.
+
+**Verified:** `node --check src/cloudKeys.js src/cloudSave.js src/ui.js
+src/main.js`; `git diff --check`; clean temp `npm install && npm run build`
+passed with 25 modules and JS gzip 144.26 KB. Production-dist browser smoke on
+`http://127.0.0.1:5192/`: disconnected cloud panel made zero API calls; mocked
+create/login/link each stored the expected local session/account state and
+called the intended `/api/account`, `/api/account/login`, `/api/account/link`,
+and `/api/save` routes; manual upload sent a real save blob with
+`client_version: 0.6.2`. Mobile 390x844 screenshot showed the panel fit without
+horizontal overflow or text overlap.
+
+**Next up:** ship/push, verify live standalone, close #8, then move to gameplay
+expansion (#15/#16) or SYL playtest audit.
+
+**Gotchas:** this UI does not store passwords. It stores the short-lived bearer
+session plus public account metadata in browser localStorage. The recovery code
+is displayed and locally cached so the player can copy it; it can only be used
+once by the existing server API.
+
+---
+
 ## 2026-07-05 — Codex — #7 cloud-save client bridge
 
 **State:** working in source. The bridge is dormant for current players until a

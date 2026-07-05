@@ -5,10 +5,12 @@
 // Network failures log and fall back to local play.
 // ============================================================
 import { GAME_VERSION } from './ui.js';
+import {
+  CLOUD_META_KEY,
+  CLOUD_OPT_IN_KEY,
+  CLOUD_SESSION_KEY
+} from './cloudKeys.js';
 
-const OPT_IN_KEY = 'fable_cloud_opt_in_v1';
-const SESSION_KEY = 'fable_cloud_session_v1';
-const META_KEY = 'fable_cloud_meta_v1';
 const PUSH_DELAY = 4; // seconds; debounce autosaves/manual saves
 
 export class CloudSave {
@@ -38,6 +40,27 @@ export class CloudSave {
     this.latestLocal = data;
     this.writeMeta({ local_updated_at: new Date().toISOString() });
     if (this.canSync()) this.pendingPush = PUSH_DELAY;
+  }
+
+  connect(session) {
+    try {
+      localStorage.setItem(CLOUD_OPT_IN_KEY, '1');
+      localStorage.setItem(CLOUD_SESSION_KEY, JSON.stringify(session));
+    } catch { /* localStorage may be unavailable */ }
+    this.pullStarted = false;
+    const local = this.safeLocal();
+    if (local) this.schedulePush(local);
+    this.boot();
+  }
+
+  disconnect() {
+    try {
+      localStorage.removeItem(CLOUD_OPT_IN_KEY);
+      localStorage.removeItem(CLOUD_SESSION_KEY);
+    } catch { /* localStorage may be unavailable */ }
+    this.pendingPush = 0;
+    this.latestLocal = null;
+    this.pullStarted = false;
   }
 
   async pull() {
@@ -140,13 +163,13 @@ export class CloudSave {
   }
 
   optedIn() {
-    try { return localStorage.getItem(OPT_IN_KEY) === '1'; }
+    try { return localStorage.getItem(CLOUD_OPT_IN_KEY) === '1'; }
     catch { return false; }
   }
 
   sessionToken() {
     try {
-      const raw = localStorage.getItem(SESSION_KEY);
+      const raw = localStorage.getItem(CLOUD_SESSION_KEY);
       if (!raw) return '';
       if (!raw.trim().startsWith('{')) return raw.trim();
       const session = JSON.parse(raw);
@@ -158,13 +181,13 @@ export class CloudSave {
   }
 
   readMeta() {
-    try { return JSON.parse(localStorage.getItem(META_KEY) || '{}'); }
+    try { return JSON.parse(localStorage.getItem(CLOUD_META_KEY) || '{}'); }
     catch { return {}; }
   }
 
   writeMeta(next) {
     try {
-      localStorage.setItem(META_KEY, JSON.stringify({ ...this.readMeta(), ...next }));
+      localStorage.setItem(CLOUD_META_KEY, JSON.stringify({ ...this.readMeta(), ...next }));
     } catch { /* ignore */ }
   }
 

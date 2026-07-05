@@ -2,6 +2,14 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.6.2 — 2026-07-05
+
+- Added cloud-save UI (#8): a top-right cloud panel for create, login, recovery
+  code linking, manual upload, disconnect, and recovery-code copy.
+- Cloud save remains optional. Local browser saves still work without an
+  account, and the cloud bridge only calls `/api/account` or `/api/save` after
+  the player opens the panel and connects.
+
 ## v0.6.1 — 2026-07-05
 
 - Added optional cloud-save client bridge (#7) layered over the existing

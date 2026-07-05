@@ -7,9 +7,16 @@
 import { ITEMS } from './items.js';
 import { PIECES } from './building.js';
 import { TRADER_STOCK } from './trader.js';
+import {
+  CLOUD_ACCOUNT_KEY,
+  CLOUD_META_KEY,
+  CLOUD_OPT_IN_KEY,
+  CLOUD_RECOVERY_KEY,
+  CLOUD_SESSION_KEY
+} from './cloudKeys.js';
 
 // bump when shipping notable changes; included in feedback reports
-export const GAME_VERSION = '0.6.1';
+export const GAME_VERSION = '0.6.2';
 
 // Short survival tips shown on death so a loss teaches something (issue #15).
 // Keep every line factually true to the mechanics — players learn from these.
@@ -42,6 +49,7 @@ export class UI {
     this.$('mb-build').addEventListener('click', () => this.togglePanel('build'));
     this.$('mb-cam').addEventListener('click', () => game.camCtl.toggleMode());
     this.$('mb-save').addEventListener('click', () => game.save.save());
+    this.$('mb-cloud').addEventListener('click', () => this.openCloud());
     this.$('mb-fb').addEventListener('click', () => this.openFeedback());
 
     // start screen
@@ -76,7 +84,7 @@ export class UI {
 
   // ---------- generic panel helpers ----------
   closeAll() {
-    for (const id of ['inv-panel', 'build-panel', 'trader-panel', 'vehicle-panel', 'fb-panel']) this.$(id).style.display = 'none';
+    for (const id of ['inv-panel', 'build-panel', 'trader-panel', 'vehicle-panel', 'cloud-panel', 'fb-panel']) this.$(id).style.display = 'none';
     this._open = null;
     this.activeStorage = null;
   }
@@ -268,6 +276,152 @@ export class UI {
     p.querySelectorAll('[data-exit]').forEach(el => el.addEventListener('click', () => this.game.vehicles.exitVehicle(v)));
   }
 
+  // ---------- cloud save ----------
+  openCloud() {
+    this._open = 'cloud';
+    this._show('cloud');
+    this.renderCloud();
+  }
+
+  renderCloud(message = '') {
+    const p = this.$('cloud-panel');
+    const account = this._cloudAccount();
+    const session = this._cloudSession();
+    const meta = this._cloudMeta();
+    const connected = localStorage.getItem(CLOUD_OPT_IN_KEY) === '1' && !!this.game.cloudSave?.sessionToken?.();
+    const handle = escapeAttr(account?.handle || localStorage.getItem('fable_fb_handle') || '');
+    const username = escapeAttr(account?.username || '');
+    const recovery = localStorage.getItem(CLOUD_RECOVERY_KEY) || '';
+    const syncLine = meta.cloud_updated_at
+      ? `Last cloud sync: ${escapeHtml(new Date(meta.cloud_updated_at).toLocaleString())}`
+      : 'No cloud sync yet on this device.';
+
+    p.innerHTML = this._panelHeader('☁️ Cloud Save')
+      + `<div style="font-size:11px;opacity:.78;margin-bottom:8px">Optional. Local saves still work without this. Use a made-up handle and a password you do not use anywhere else.</div>`
+      + `<div class="cloud-status ${connected ? 'on' : 'off'}">${connected ? `Connected as ${escapeHtml(account?.handle || account?.username || 'Survivor')}` : 'Not connected'}</div>`
+      + `<div style="font-size:10px;opacity:.7;margin:5px 0 10px">${escapeHtml(syncLine)}${session?.expires_at ? ` Session expires ${escapeHtml(new Date(session.expires_at).toLocaleString())}.` : ''}</div>`
+      + `<input type="text" id="cloud-handle" maxlength="24" placeholder="Handle" value="${handle}">`
+      + `<input type="text" id="cloud-user" maxlength="24" placeholder="Username" value="${username}">`
+      + `<input type="password" id="cloud-pass" maxlength="96" placeholder="Password (6+ characters)">`
+      + `<div class="rowbtns"><button id="cloud-create">Create</button><button id="cloud-login">Login</button></div>`
+      + `<div style="font-size:11px;opacity:.75;margin:10px 0 6px">Play on another device</div>`
+      + `<input type="text" id="cloud-code" maxlength="32" placeholder="Recovery code, like FABLE-ABCD-2345-WXYZ">`
+      + `<div class="rowbtns"><button id="cloud-link">Link code</button>${connected ? '<button id="cloud-sync">Sync now</button><button id="cloud-off">Disconnect</button>' : ''}</div>`
+      + (recovery ? `<div class="cloud-code">Recovery code:<br><b>${escapeHtml(recovery)}</b><br><small>Copy this before using another device. It can only be linked once.</small><div class="rowbtns"><button id="cloud-copy">Copy code</button></div></div>` : '')
+      + `<div id="cloud-status" style="font-size:11px;margin-top:8px;text-align:center;opacity:.9">${escapeHtml(message)}</div>`;
+    this._wireClose(p);
+    p.querySelector('#cloud-create').addEventListener('click', () => this._cloudCreate());
+    p.querySelector('#cloud-login').addEventListener('click', () => this._cloudLogin());
+    p.querySelector('#cloud-link').addEventListener('click', () => this._cloudLink());
+    p.querySelector('#cloud-sync')?.addEventListener('click', () => this._cloudSyncNow());
+    p.querySelector('#cloud-off')?.addEventListener('click', () => this._cloudDisconnect());
+    p.querySelector('#cloud-copy')?.addEventListener('click', () => this._cloudCopyCode());
+  }
+
+  async _cloudCreate() {
+    const username = this.$('cloud-user').value.trim();
+    const password = this.$('cloud-pass').value;
+    const handle = this.$('cloud-handle').value.trim();
+    if (username.length < 3) return this._cloudStatus('Username needs 3+ letters/numbers.');
+    if (password.length < 6) return this._cloudStatus('Password needs 6+ characters.');
+    await this._cloudRequest('/api/account', { handle, username, password }, 'Cloud save enabled.');
+  }
+
+  async _cloudLogin() {
+    const username = this.$('cloud-user').value.trim();
+    const password = this.$('cloud-pass').value;
+    if (username.length < 3 || password.length < 6) return this._cloudStatus('Enter your username and password.');
+    await this._cloudRequest('/api/account/login', { username, password }, 'Signed in. Pulling cloud save…');
+  }
+
+  async _cloudLink() {
+    const recovery_code = this.$('cloud-code').value.trim();
+    if (recovery_code.replace(/[^a-z0-9]/gi, '').length < 10) return this._cloudStatus('Enter the full recovery code.');
+    await this._cloudRequest('/api/account/link', { recovery_code }, 'Device linked. Pulling cloud save…');
+  }
+
+  async _cloudRequest(url, payload, success) {
+    this._cloudStatus('Connecting…');
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return this._cloudStatus(this._cloudError(data.error));
+      localStorage.setItem(CLOUD_ACCOUNT_KEY, JSON.stringify(data.account || {}));
+      if (data.recovery_code) localStorage.setItem(CLOUD_RECOVERY_KEY, data.recovery_code);
+      this.game.cloudSave.connect(data.session);
+      this._cloudStatus(success);
+      setTimeout(() => this.renderCloud(success), 250);
+    } catch {
+      this._cloudStatus('No connection — try again later.');
+    }
+  }
+
+  async _cloudSyncNow() {
+    this._cloudStatus('Uploading this device…');
+    try {
+      const data = this.game.save.snapshot();
+      this.game.save.writeLocal(data);
+      this.game.cloudSave.onLocalSave(data);
+      const pushed = await this.game.cloudSave.push(data);
+      this.renderCloud(pushed ? 'This device is uploaded.' : 'Could not upload right now.');
+    } catch {
+      this._cloudStatus('Could not upload right now.');
+    }
+  }
+
+  _cloudDisconnect() {
+    this.game.cloudSave.disconnect();
+    localStorage.removeItem(CLOUD_ACCOUNT_KEY);
+    localStorage.removeItem(CLOUD_RECOVERY_KEY);
+    this.renderCloud('Disconnected. This device keeps its local save.');
+  }
+
+  async _cloudCopyCode() {
+    const code = localStorage.getItem(CLOUD_RECOVERY_KEY) || '';
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code);
+      this._cloudStatus('Recovery code copied.');
+    } catch {
+      this._cloudStatus('Copy failed. Select the code and copy it.');
+    }
+  }
+
+  _cloudStatus(message) {
+    const status = this.$('cloud-status');
+    if (status) status.textContent = message;
+  }
+
+  _cloudAccount() {
+    try { return JSON.parse(localStorage.getItem(CLOUD_ACCOUNT_KEY) || '{}'); }
+    catch { return {}; }
+  }
+
+  _cloudSession() {
+    try { return JSON.parse(localStorage.getItem(CLOUD_SESSION_KEY) || '{}'); }
+    catch { return {}; }
+  }
+
+  _cloudMeta() {
+    try { return JSON.parse(localStorage.getItem(CLOUD_META_KEY) || '{}'); }
+    catch { return {}; }
+  }
+
+  _cloudError(error) {
+    if (error === 'username-taken') return 'That username is taken.';
+    if (error === 'bad-username') return 'Use 3-24 letters, numbers, _ or -.';
+    if (error === 'bad-password') return 'Password needs 6-96 characters.';
+    if (error === 'invalid-login') return 'Username or password did not match.';
+    if (error === 'invalid-code') return 'Recovery code did not work.';
+    if (error === 'slow-down') return 'Too many tries. Wait a minute.';
+    if (error === 'not-configured') return 'Cloud save is not configured on the server yet.';
+    return 'Cloud save failed. Try again later.';
+  }
+
   // ---------- feedback (goes to GitHub issues via /api/feedback) ----------
   openFeedback() {
     this._open = 'fb';
@@ -366,4 +520,12 @@ export class UI {
     this.$('death-screen').style.display = 'flex';
     this.closeAll();
   }
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/`/g, '&#96;');
 }
