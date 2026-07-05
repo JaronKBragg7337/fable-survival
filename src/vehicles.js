@@ -12,7 +12,7 @@ import { ITEMS } from './items.js';
 const REQUIRED = { fuel: 1, battery: 1, wheel: 2 };
 const CAR_SPEED = 12.0;          // faster than sprint (6.6)
 const CAR_REVERSE = 6.0;
-const CAR_TURN_RATE = 2.4;       // rad/s
+const CAR_TURN_RATE = 1.7;       // rad/s (was 2.4; calmer, less spin)
 const CAR_EXIT_DIST = 2.5;
 
 export class Vehicles {
@@ -122,20 +122,27 @@ export class Vehicles {
     const input = this.game.input;
     const move = input.move;
 
-    // forward/backward
-    const fwd = move.z;
-    const speed = fwd > 0 ? CAR_SPEED : fwd < 0 ? -CAR_REVERSE : 0;
-    if (Math.abs(fwd) > 0.1) {
+    // Stick/keys: pushing UP (or W) reads as move.z < 0, so forward = -move.z.
+    // The car BODY mesh is long on its local +X axis, so its visual nose points
+    // along world (cos, -sin) of rotation.y. Driving MUST use that same axis or
+    // the car slides sideways to where it points (the old bug used +Z = 90 off).
+    const theta = v.mesh.rotation.y;
+    const throttle = -move.z;              // up/W = forward, down/S = reverse
+    const steer = move.x;                  // right = turn right (see sign below)
+    const speed = throttle > 0.12 ? CAR_SPEED : throttle < -0.12 ? -CAR_REVERSE : 0;
+
+    if (Math.abs(speed) > 0.001) {
       const s = speed * dt;
-      v.mesh.position.x += Math.sin(v.mesh.rotation.y) * s;
-      v.mesh.position.z += Math.cos(v.mesh.rotation.y) * s;
+      v.mesh.position.x += Math.cos(theta) * s;   // drive along the nose (+X)
+      v.mesh.position.z += -Math.sin(theta) * s;
     }
 
-    // turn (only when moving, like a real car)
-    const turn = move.x;
-    if (Math.abs(turn) > 0.1 && Math.abs(fwd) > 0.05) {
-      const dir = fwd < 0 ? -1 : 1; // reverse turns opposite
-      v.mesh.rotation.y += turn * CAR_TURN_RATE * dir * dt;
+    // Steer only while actually rolling, so a parked car never spins in place.
+    // rotation.y -= steer  curves the nose toward the player's right with the
+    // chase cam sitting behind (verified against the camera basis).
+    if (Math.abs(steer) > 0.15 && Math.abs(speed) > 0.001) {
+      const dir = speed < 0 ? -1 : 1;      // reverse steers opposite, like a real car
+      v.mesh.rotation.y -= steer * CAR_TURN_RATE * dir * dt;
     }
 
     // world bounds

@@ -22,10 +22,18 @@ export class CameraController {
 
   update() {
     const d = this.input.consumeLook();
-    this.yaw -= d.x;
-    this.pitch = Math.max(-1.2, Math.min(1.35, this.pitch + d.y));
-
     const v = this.player.inVehicle;
+    if (v) {
+      // Driving chase cam: lock the camera BEHIND the car's nose so "push up =
+      // drive into the screen". Nose is local +X, so behind-yaw = rotation.y - PI/2
+      // (verified: that offset equals -nose). Look-drag still tilts pitch only.
+      this.yaw = v.mesh.rotation.y - Math.PI / 2;
+      this.pitch = Math.max(0.05, Math.min(0.9, this.pitch + d.y));
+    } else {
+      this.yaw -= d.x;
+      this.pitch = Math.max(-1.2, Math.min(1.35, this.pitch + d.y));
+    }
+
     const p = v ? v.mesh.position : this.player.pos;
     if (this.firstPerson) {
       this.camera.position.set(p.x, p.y + 1.55, p.z);
