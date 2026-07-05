@@ -2,7 +2,7 @@
 
 ## 2026-07-05 — Codex — multiplayer build snapshot sync
 
-**State:** local verification passed; ready for commit/push.
+**State:** live verified on standalone and Heartbeat-hosted routes.
 
 **Shipped:** extended `src/multiplayer.js` with a `build-snapshot` Realtime
 broadcast. On subscribe and when a new peer first sends state, a client with
@@ -19,8 +19,14 @@ modules and JS gzip 144.96 KB. Production-dist Chrome smoke on
 `http://127.0.0.1:5201/`: served `assets/index-BV92Sd35.js`, rendered one
 canvas, entered the world, displayed HUD, initialized the Realtime chip, and
 logged zero warnings/errors.
+Standalone deploy poll returned 200 for `/assets/index-BV92Sd35.js` with
+`build-snapshot` and `vehicleId`. Standalone live Chrome smoke at
+`https://fable-survival.vercel.app/` rendered one canvas, entered the world,
+displayed the HUD, initialized the Realtime chip, and logged zero
+warnings/errors. Heartbeat hosted live smoke also passed at
+`https://www.heartbeatobservatory.com/games/fable-survival/`.
 
-**Next up:** push/sync Heartbeat and verify live.
+**Next up:** durable shared bases/parked vehicles need a schema-backed pass.
 
 **Gotchas:** this improves late-join visibility while at least one builder is
 online. It is not durable after every client leaves. Durable shared bases and
