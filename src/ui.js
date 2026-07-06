@@ -51,6 +51,9 @@ export class UI {
     this.$('mb-save').addEventListener('click', () => game.save.save());
     this.$('mb-cloud').addEventListener('click', () => this.openCloud());
     this.$('mb-fb').addEventListener('click', () => this.openFeedback());
+    // feedback must be reachable everywhere, not just mid-game (issue: "on all pages")
+    this.$('start-fb-btn').addEventListener('click', () => this.openFeedback());
+    this.$('death-fb-btn').addEventListener('click', () => this.openFeedback());
 
     // start screen
     this.$('start-help').textContent = game.input.isTouch

@@ -98,6 +98,11 @@
     #start-screen p { font-size: 12px; opacity: .8; max-width: 320px; line-height: 1.6; margin-top: 8px; }
     #start-tip { color: #ff9a6b; opacity: .95; font-size: 12px; max-width: 320px; line-height: 1.5; margin-top: 10px; }
     #death-tip { font-size: 12px; opacity: .82; max-width: 320px; line-height: 1.5; margin-top: 12px; }
+    /* Feedback must reach players even while a fullscreen screen (start/death)
+       is up, so its panel sits above .fullscreen-msg (z-index 100). */
+    #fb-panel { z-index: 110; }
+    .screen-fb-btn { margin-top: 10px; background: rgba(255,255,255,.12) !important; color: #fff; border: 1px solid rgba(255,255,255,.3) !important;
+      border-radius: 8px; padding: 8px 16px !important; font-size: 12px !important; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -146,6 +151,7 @@
     <h1>YOU DIED</h1><div id="death-reason"></div>
     <div id="death-tip"></div>
     <button id="respawn-btn">Respawn at Safe Zone</button>
+    <button class="screen-fb-btn" id="death-fb-btn">💬 Send Feedback</button>
   </div>
   <div class="fullscreen-msg" id="start-screen">
     <h1>FABLE SURVIVAL</h1>
@@ -153,6 +159,7 @@
     <p id="start-help"></p>
     <p id="start-tip"></p>
     <button id="start-btn">Enter World</button>
+    <button class="screen-fb-btn" id="start-fb-btn">💬 Send Feedback</button>
   </div>
 
   <script type="module" src="/src/main.js"></script>
