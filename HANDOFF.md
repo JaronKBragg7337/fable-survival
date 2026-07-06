@@ -1,5 +1,58 @@
 # HANDOFF.md — Session Log
 
+## 2026-07-06 — Claude — in-game AI chat that can act on live state (🤖)
+
+**State:** live in production, but inert until the owner adds env vars (by
+design — see below). Everything else in the game is unaffected either way.
+
+**Shipped:** the owner asked to be able to talk to Claude from inside the
+game and have it "make things happen." Added a 🤖 menubar button opening a
+chat panel (`UI.openAiChat()` / `_renderAiChat()` / `_sendAiChat()` in
+`src/ui.js`) and a new `api/aichat.js` Vercel function. Unlike `/api/feedback`
+(one-way, safe by construction — it only ever becomes a GitHub issue), this
+endpoint can mutate live gameplay, so it is gated behind a shared passphrase
+(`AI_CHAT_KEY`) on top of `ANTHROPIC_API_KEY` — without both, it returns
+`not-configured` and never calls Anthropic at all (zero cost/blast radius for
+random players/testers). When configured, it calls the Anthropic Messages API
+with a small fixed tool schema — `give_item`, `heal`, `give_coins`,
+`set_time`, `teleport_safezone` — and the client applies returned actions
+through `_applyAiAction()`, which re-validates/clamps every field again
+client-side (defense in depth) and only touches existing public hooks
+(`inventory.add`, `stats.consume`, `coins`, `dayNight.time`, `player.pos`) —
+no new internal systems, no arbitrary code execution. Chat history is
+in-memory only (capped at 20 turns), never persisted. `GAME_VERSION` bumped
+to `0.7.0`. Full design/setup doc: AI_CHAT.md. `.env.example` documents the
+three new env vars (placeholders only).
+
+**Verified:** clean temp `npm install` + `npm run build` passed, 25 modules,
+JS gzip 146.10 KB (under the 200 KB budget). Headless Playwright smoke:
+🤖 panel opens, chat log renders, sending a message with no key set fails
+gracefully with no new console/page errors (only a pre-existing, unrelated
+sandbox network restriction blocking an external CDN import used by
+`multiplayer.js`). Confirmed live post-deploy at
+`https://fable-survival.vercel.app/`: served bundle hash matches the local
+build exactly (`index-PQL0LRu8.js`); `POST /api/aichat` returns
+`503 {"error":"not-configured"}` as expected pre-configuration.
+
+**Next up:** owner must add `ANTHROPIC_API_KEY` (from
+https://console.anthropic.com) and `AI_CHAT_KEY` (a private passphrase they
+choose) to the Vercel project's environment variables, then redeploy (a
+no-op `git push` or a manual redeploy from the Vercel dashboard both work —
+env var changes need a fresh deployment to take effect). After that, typing
+the matching dev code into the panel's "Dev code" field unlocks live actions.
+`ANTHROPIC_MODEL` is optional (defaults to `claude-3-5-haiku-20241022`).
+Longer-term ideas logged in ROADMAP.md Milestone 5 (expand the tool list;
+consider surfacing this on start/death screens too if desired).
+
+**Gotchas:** this is intentionally owner-gated, not a public feature — it is
+a different, higher-stakes thing than the icebox "Ask the Dev Team v2" idea
+(chat-only Q&A, still unbuilt). Do not relax the `AI_CHAT_KEY` gate or widen
+the tool list without keeping every new action bounded/whitelisted the same
+way; the whole point is that a wrong/missing key means zero effect, not a
+degraded-permissions mode.
+
+---
+
 ## 2026-07-06 — Claude — feedback reachable from every screen
 
 **State:** live verified in production.
