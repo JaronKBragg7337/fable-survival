@@ -56,7 +56,10 @@
     #menubar { position: fixed; top: calc(max(8px, env(safe-area-inset-top)) + 50px); right: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 20; }
     .mbtn { background: rgba(0,0,0,.55); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 8px;
       padding: 7px 10px; font-size: 11px; cursor: pointer; min-width: 44px; text-align: center; }
-    .mbtn:active { background: rgba(255,255,255,.25); }
+    .back-btn { background: rgba(0,0,0,.55); color: #fff; border: 1px solid rgba(255,255,255,.3); border-radius: 8px;
+      padding: 7px 10px; font-size: 11px; cursor: pointer; min-width: 44px; text-align: center; text-decoration:none; }
+    .back-btn:hover { background: rgba(255,255,255,.25); }
+    .back-btn:active { background: rgba(255,255,255,.25); }
 
     /* ---------- Panels (inventory / build / trader / vehicle) ---------- */
     .panel { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); background: rgba(15,18,22,.94);
@@ -121,6 +124,7 @@
 
   <!-- Menu -->
   <div id="menubar">
+    <a class="back-btn" href="/games/">← Games</a>
     <button class="mbtn" id="mb-inv">🎒</button>
     <button class="mbtn" id="mb-build">🔨</button>
     <button class="mbtn" id="mb-cam">👁</button>
