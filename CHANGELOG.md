@@ -2,6 +2,14 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.6.6 — 2026-07-06
+
+- Feedback (💬) is now reachable from every screen, not just mid-game. Added a
+  "Send Feedback" button to the start screen and death screen, both of which
+  previously covered the menubar and made the existing feedback panel
+  unreachable there. `#fb-panel` z-index raised above `.fullscreen-msg` so the
+  panel renders and is clickable when opened from those screens.
+
 ## v0.6.5 — 2026-07-05
 
 - Multiplayer build sharing now sends a bounded build snapshot when connected
