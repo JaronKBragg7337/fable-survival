@@ -2,6 +2,16 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.7.0 — 2026-07-06
+
+- Added an in-game AI chat (🤖 button): a live conversation with Claude that,
+  with the owner's dev code, can call bounded tools to act on the running
+  game — give items, restore health/hunger/thirst, give coins, skip the
+  clock, or teleport to the safe zone. New `/api/aichat` serverless function,
+  gated by `AI_CHAT_KEY` (in addition to requiring `ANTHROPIC_API_KEY`) so it
+  does nothing for random players until the owner configures both. See
+  AI_CHAT.md for setup and the full tool list.
+
 ## v0.6.6 — 2026-07-06
 
 - Feedback (💬) is now reachable from every screen, not just mid-game. Added a
