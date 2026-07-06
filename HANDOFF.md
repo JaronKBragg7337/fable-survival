@@ -1,5 +1,39 @@
 # HANDOFF.md — Session Log
 
+## 2026-07-06 — Claude — feedback reachable from every screen
+
+**State:** live verified in production.
+
+**Shipped:** the 💬 feedback button lived only in `#menubar`, which is behind
+`#start-screen` and `#death-screen` (both `.fullscreen-msg`, z-index 100 vs
+menubar's 20) — so a player who hadn't entered the world yet, or who had just
+died, had no way to reach it even though `/api/feedback` worked fine mid-game.
+Added a "💬 Send Feedback" button to both screens, wired to the existing
+`UI.openFeedback()` flow (same panel, same `/api/feedback` → GitHub issue
+pipeline, no backend changes). Raised `#fb-panel` z-index to 110 (above
+`.fullscreen-msg`'s 100) so the panel is visible/clickable when opened from
+those screens instead of rendering invisibly behind them. `GAME_VERSION` bumped
+to `0.6.6`.
+
+**Verified:** clean temp `npm install` + `npm run build` passed, 25 modules,
+JS gzip 144.98 KB (under the 200 KB budget). Confirmed live at
+`https://fable-survival.vercel.app/` post-deploy: both "💬 Send Feedback"
+buttons render on the death screen and start screen.
+
+**Next up:** the owner also wants an in-game AI chat that can take actions in
+the world during the conversation (not just report feedback). That needs: a
+new `/api/chat` serverless function calling an LLM with tool-calling, an
+`ANTHROPIC_API_KEY` (or similar) added to the Vercel project's env vars, a
+decision on which in-game actions are safe to expose, and — since this can
+mutate game state — an access-gate so random players can't use it to break
+balance. See conversation/session notes for the proposed design; not yet
+started as of this entry.
+
+**Gotchas:** none introduced. This is additive UI only — no changes to
+`api/feedback.js`, save format, or multiplayer.
+
+---
+
 ## 2026-07-05 — Codex — multiplayer build snapshot sync
 
 **State:** live verified on standalone and Heartbeat-hosted routes.
