@@ -101,6 +101,20 @@ must not break the live link. See CLAUDE.md for the full protocol.
       Owner must generate a new fine-grained PAT (fable-survival only, Issues R/W)
       and update the Vercel env var, then redeploy. Feedback silently stops if missed.
 
+## Milestone 5 — AI companion
+
+- [x] In-game AI chat (🤖 button): talks to Claude and, with the owner's dev
+      code, can act on live game state (give items, heal/restore, give coins,
+      skip the clock, teleport to the safe zone). Owner-gated via
+      `AI_CHAT_KEY`; requires `ANTHROPIC_API_KEY` in Vercel (#20). See
+      AI_CHAT.md. Distinct from the icebox "Ask the Dev Team v2" idea below,
+      which is a lower-stakes chat-only Q&A and is still unbuilt.
+- [ ] Expand the tool list if useful (e.g. spawn/despawn zombies, install a
+      vehicle part) — keep every new tool bounded/whitelisted the same way.
+- [ ] Consider surfacing the AI chat button on the start/death screens too if
+      the owner wants it reachable everywhere feedback is (currently menubar
+      only, since it's an owner/dev tool rather than a player-facing one).
+
 ## Icebox (ideas, unprioritized)
 
 - Weather (rain/fog days), seasons

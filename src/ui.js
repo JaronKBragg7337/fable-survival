@@ -16,7 +16,7 @@ import {
 } from './cloudKeys.js';
 
 // bump when shipping notable changes; included in feedback reports
-export const GAME_VERSION = '0.6.6';
+export const GAME_VERSION = '0.7.0';
 
 // Short survival tips shown on death so a loss teaches something (issue #15).
 // Keep every line factually true to the mechanics — players learn from these.
@@ -51,9 +51,12 @@ export class UI {
     this.$('mb-save').addEventListener('click', () => game.save.save());
     this.$('mb-cloud').addEventListener('click', () => this.openCloud());
     this.$('mb-fb').addEventListener('click', () => this.openFeedback());
+    this.$('mb-ai').addEventListener('click', () => this.openAiChat());
     // feedback must be reachable everywhere, not just mid-game (issue: "on all pages")
     this.$('start-fb-btn').addEventListener('click', () => this.openFeedback());
     this.$('death-fb-btn').addEventListener('click', () => this.openFeedback());
+
+    this._aiHistory = []; // [{role:'user'|'assistant', content}] - in-memory only, not persisted
 
     // start screen
     this.$('start-help').textContent = game.input.isTouch
@@ -87,7 +90,7 @@ export class UI {
 
   // ---------- generic panel helpers ----------
   closeAll() {
-    for (const id of ['inv-panel', 'build-panel', 'trader-panel', 'vehicle-panel', 'cloud-panel', 'fb-panel']) this.$(id).style.display = 'none';
+    for (const id of ['inv-panel', 'build-panel', 'trader-panel', 'vehicle-panel', 'cloud-panel', 'fb-panel', 'ai-panel']) this.$(id).style.display = 'none';
     this._open = null;
     this.activeStorage = null;
   }
@@ -489,6 +492,123 @@ export class UI {
     } catch {
       status.textContent = 'No connection — try again later.';
     }
+  }
+
+  // ---------- AI chat (talks to /api/aichat; can act on live game state) ----------
+  openAiChat() {
+    this._open = 'ai';
+    this._show('ai');
+    this._renderAiChat();
+    setTimeout(() => this.$('ai-msg')?.focus(), 0);
+  }
+
+  _renderAiChat(status = '') {
+    const p = this.$('ai-panel');
+    const savedKey = (localStorage.getItem('fable_ai_key') || '').replace(/"/g, '&quot;');
+    p.innerHTML = this._panelHeader('🤖 Talk to the Dev AI')
+      + `<div style="font-size:11px;opacity:.75;margin-bottom:8px">Chats with Claude. With the correct dev code it can act on
+         your live game — heal you, give supplies, skip time, or send you to the safe zone.</div>`
+      + `<input type="password" id="ai-key" maxlength="64" placeholder="Dev code" value="${savedKey}" style="margin-bottom:6px">`
+      + `<div class="ai-log" id="ai-log"></div>`
+      + `<div class="ai-row"><textarea id="ai-msg" maxlength="400" rows="2" placeholder="Say something…"></textarea><button id="ai-send">Send</button></div>`
+      + `<div id="ai-status" style="font-size:11px;margin-top:6px;text-align:center;opacity:.85">${escapeHtml(status)}</div>`;
+    this._wireClose(p);
+    this._renderAiLog();
+    const send = () => this._sendAiChat();
+    p.querySelector('#ai-send').addEventListener('click', send);
+    p.querySelector('#ai-msg').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+  }
+
+  _renderAiLog() {
+    const log = this.$('ai-log');
+    if (!log) return;
+    log.innerHTML = this._aiHistory.length
+      ? this._aiHistory.map(h => `<div class="ai-msg ${h.role === 'user' ? 'user' : 'bot'}">${escapeHtml(h.content)}</div>`).join('')
+      : `<div class="ai-msg sys">No messages yet. Ask it something!</div>`;
+    log.scrollTop = log.scrollHeight;
+  }
+
+  async _sendAiChat() {
+    const input = this.$('ai-msg');
+    const status = this.$('ai-status');
+    const message = input.value.trim();
+    if (message.length < 1) return;
+    const key = this.$('ai-key').value;
+    localStorage.setItem('fable_ai_key', key);
+
+    this._aiHistory.push({ role: 'user', content: message });
+    this._renderAiLog();
+    input.value = '';
+    status.textContent = 'Thinking…';
+
+    try {
+      const g = this.game;
+      const state = {
+        health: g.stats.health, hunger: g.stats.hunger, thirst: g.stats.thirst,
+        coins: g.coins, clock: g.dayNight.clockText(),
+        driving: g.player.inVehicle ? 'yes' : 'no'
+      };
+      const r = await fetch('/api/aichat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, message, history: this._aiHistory.slice(0, -1), state })
+      });
+      const d = await r.json().catch(() => ({}));
+      if (r.ok) {
+        this._aiHistory.push({ role: 'assistant', content: d.reply || '(no reply)' });
+        this._aiHistory = this._aiHistory.slice(-20);
+        this._renderAiLog();
+        status.textContent = '';
+        for (const action of d.actions || []) this._applyAiAction(action);
+      } else if (d.error === 'not-configured') {
+        status.textContent = 'AI chat is not hooked up yet — needs an API key in Vercel.';
+      } else if (d.error === 'bad-key') {
+        status.textContent = 'Wrong dev code.';
+      } else if (d.error === 'slow-down') {
+        status.textContent = 'Too many messages — wait a bit.';
+      } else {
+        status.textContent = 'Could not reach the AI — try again later.';
+      }
+    } catch {
+      status.textContent = 'No connection — try again later.';
+    }
+  }
+
+  // Apply a bounded action returned by /api/aichat. Every field is
+  // re-validated/clamped here too (defense in depth) - this only ever
+  // touches the same public hooks normal gameplay already uses.
+  _applyAiAction(action) {
+    const g = this.game;
+    const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, Number(n) || 0));
+    try {
+      if (action.type === 'give_item') {
+        const id = String(action.input?.item || '');
+        if (!ITEMS[id]) return;
+        const count = clamp(action.input?.count, 1, 10);
+        g.inventory.add(id, count);
+        this.toast(`🤖 Gave you ${ITEMS[id].icon} ${ITEMS[id].name} ×${count}`);
+      } else if (action.type === 'heal') {
+        const use = {};
+        if (action.input?.health) use.health = clamp(action.input.health, 1, 100);
+        if (action.input?.hunger) use.hunger = clamp(action.input.hunger, 1, 100);
+        if (action.input?.thirst) use.thirst = clamp(action.input.thirst, 1, 100);
+        if (Object.keys(use).length) { g.stats.consume(use); this.toast('🤖 Restored your stats'); }
+      } else if (action.type === 'give_coins') {
+        const amount = clamp(action.input?.amount, 1, 500);
+        g.coins = Math.min(99999, g.coins + amount);
+        this.toast(`🤖 +${amount} 🪙`);
+      } else if (action.type === 'set_time') {
+        g.dayNight.time = clamp(action.input?.hour, 0, 23.99);
+        this.toast(`🤖 Skipped time to ${g.dayNight.clockText()}`);
+      } else if (action.type === 'teleport_safezone') {
+        if (g.player.inVehicle) g.vehicles.exitVehicle(g.player.inVehicle);
+        g.player.pos.set(0, 0, 6);
+        g.player.velY = 0;
+        this.toast('🤖 Teleported to the safe zone');
+      }
+    } catch { /* never let a malformed action crash the game */ }
   }
 
   // ---------- HUD ----------
