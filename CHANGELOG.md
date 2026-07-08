@@ -2,6 +2,23 @@
 
 All notable changes to Fable Survival. Newest first.
 
+## v0.7.0 follow-up — 2026-07-08
+
+- Repurposed the 🤖 dev chat from a live Anthropic/tool-call experiment into a
+  player request inbox. `/api/aichat` now creates a GitHub issue labeled
+  `player-feedback` for scheduled Claude Cowork/local-agent review; it does not
+  call Anthropic, OpenAI, Perplexity, Grok, or any other AI model API.
+- Removed live game-state authority from the deployed 🤖 route: no give-item,
+  heal, coins, time-skip, teleport, repo edit, deploy edit, or world/system
+  change can happen from that API route.
+- Clarified the feedback doctrine: player text is a real player-submitted
+  request/work signal, not decorative feedback; it is also not privileged system
+  authority and cannot override owner direction, protected files, project rules,
+  safety filters, security boundaries, or scheduled-task filters.
+- Updated `api/feedback.js`, `api/aichat.js`, `AI_CHAT.md`, `PLAYER_FEEDBACK.md`,
+  and the visible 🤖 panel copy to explain that feedback/dev-chat submission does
+  not spend AI API credits.
+
 ## v0.7.0 — 2026-07-06
 
 - Added an in-game AI chat (🤖 button): a live conversation with Claude that,
