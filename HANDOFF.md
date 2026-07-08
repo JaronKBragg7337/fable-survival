@@ -1,5 +1,54 @@
 # HANDOFF.md — Session Log
 
+## 2026-07-08 — ChatGPT — Heartbeat mirror sync protocol added
+
+**State:** documentation/process update pushed to `fable-survival` only. This did
+not sync the actual Heartbeat-hosted copy yet and did not touch
+`heartbeat-observatory`, SYL, Kimi expansion work, Heartbeat engine/shell,
+`hb-device-tier.js`, Social, Library, Theater, PAM, Supabase schema, or unrelated
+website files.
+
+**Shipped:** added the missing Fable equivalent of SYL's live-site sync law. Fable
+now tells future agents that finished Fable work must not stop at the standalone
+Vercel app. After a verified Fable update, a computer-capable agent must build
+Fable (`npm run build`), copy `dist/` into
+`heartbeat-observatory/games/fable-survival/`, preserve Heartbeat-only wrapper
+behavior, update handoffs/docs, and push Heartbeat so
+`https://www.heartbeatobservatory.com/games/fable-survival/` stays current.
+
+**Files changed:**
+- `HEARTBEAT_SYNC_PROMPT.md` — new copy/paste prompt for Claude Cowork, Claude
+  Code, Codex, or another local/computer agent to bring the Heartbeat mirror to
+  current Fable state safely.
+- `AGENTS.md` — added Heartbeat mirror as a non-negotiable live target and added
+  the sync prompt/read order.
+- `CLAUDE.md` — added the two-surface deploy law: standalone Fable plus Heartbeat
+  mirror. Also corrected player-feedback triage wording so player text is a real
+  request/work signal but not privileged system authority.
+- `PORTABILITY.md` — added the Heartbeat mirror deploy procedure, boundaries,
+  API-route requirements, verification checklist, one-prompt sync note, and the
+  future GitHub Actions caveat.
+- `BOOTSTRAP.md` — added Heartbeat mirror verification and the requirement to sync
+  Heartbeat when Fable changes.
+
+**Current intended one-prompt flow:** paste `HEARTBEAT_SYNC_PROMPT.md` into a
+computer-capable AI. It should pull both repos, build Fable, copy the latest
+`dist/` into Heartbeat, preserve `/hb-device-tier.js` and any valid quality-chip
+wrapper, add/verify Heartbeat-side no-credit feedback/dev-chat issue routes,
+commit/push Heartbeat, then document exactly what was mirrored.
+
+**Gotchas:** this is agent-automatic, not yet GitHub-Action automatic. A true
+cross-repo GitHub Action would require a safe owner-managed cross-repo write
+secret and was intentionally not added. The actual current-state mirror into
+`heartbeat-observatory/games/fable-survival/` is still the next task; these docs
+make that task one prompt instead of a fresh explanation each time.
+
+**Next up:** run the one-prompt sync with a computer-capable AI to bring
+`https://www.heartbeatobservatory.com/games/fable-survival/` up to the current
+standalone Fable state while preserving Heartbeat-only hosted behavior.
+
+---
+
 ## 2026-07-08 — ChatGPT — dev chat converted to no-credit request inbox
 
 **State:** pushed to `fable-survival`; Vercel status succeeded after the final
