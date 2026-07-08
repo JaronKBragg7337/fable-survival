@@ -1,67 +1,85 @@
-# AI_CHAT.md — In-game AI chat that can act on live state
+# AI_CHAT.md — Dev chat as a request inbox
 
-The 🤖 button in the menubar opens a chat with Claude. Unlike 💬 feedback
-(one-way, goes to a GitHub issue), this is a live conversation: the assistant
-can call a fixed set of tools that immediately change the running game for
-whoever is chatting (give items, heal/restore hunger-thirst, give coins, skip
-the clock, teleport to the safe zone).
+The 🤖 button in the menubar is kept as a chat-shaped way for a player or tester
+to talk to the dev system. In the current approved architecture, it does **not**
+call Claude, Anthropic, OpenAI, Perplexity, Grok, or any other AI model API.
 
-## Why it's gated
+It is a request inbox:
 
-Feedback text is safe because it only ever becomes a GitHub issue for a human
-to read. This endpoint can mutate live gameplay, so unlike `/api/feedback` it
-is **fully gated behind a shared passphrase** (`AI_CHAT_KEY`). Without the
-correct code, `/api/aichat` does nothing — it never even calls Anthropic — so
-random players/testers get a "wrong dev code" message and no cost/blast radius
-is possible. This is meant as the owner's personal dev tool, not a public
-feature (the icebox item "Ask the Dev Team v2" is a *different*, lower-stakes
-idea — a chat-only Q&A — and is still unbuilt).
+```text
+player/tester types bug, idea, addition, or request
+→ /api/aichat stores it as a GitHub issue labeled player-feedback
+→ scheduled Claude Cowork / local dev-agent workflow can review it later
+→ any game-changing work happens from the owner's computer workflow
+```
+
+## Current authority boundary
+
+API routes may collect signals. They must not create major game-changing action
+on their own.
+
+Allowed for this chat:
+
+- collect bugs, ideas, requests, and additions
+- preserve recent in-panel context in the created GitHub issue
+- include a small current-game snapshot for debugging
+- return a confirmation message to the player/tester
+
+Not allowed for this chat right now:
+
+- no Anthropic/OpenAI/Perplexity/Grok model call
+- no AI API credit usage
+- no live game-state mutation
+- no tool calls such as give items, heal, coins, time skip, teleport
+- no repo edits, deployment edits, or world/system changes from the deployed API
+
+## Why this exists
+
+The owner wants player requests to matter. Player text is a real work signal, not
+decorative feedback. It can become actual work after scheduled review.
+
+The security boundary is about authority, not dismissal:
+
+- A player can request real changes.
+- A scheduled Cowork/local-agent pass can evaluate and build valid requests.
+- A player message cannot override owner direction, project rules, protected
+  files, safety filters, security boundaries, or scheduled-task filters.
+
+Phrase this as: **player-submitted request/work signal, not privileged system
+authority**.
+
+Avoid phrasing it as: "feedback, not instructions". That wording is too blunt
+and can cause future AI workers to ignore valid player requests.
 
 ## Required Vercel environment variables
 
-Set these on the `fable-survival` Vercel project (Project Settings →
-Environment Variables), then redeploy:
+This route needs only the same issue-inbox secret used by feedback:
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-...        # from https://console.anthropic.com
-AI_CHAT_KEY=choose-a-private-code   # shared secret typed into the in-game "Dev code" field
-ANTHROPIC_MODEL=claude-3-5-haiku-20241022   # optional override; server has this as the default
+GITHUB_TOKEN=github_pat_...   # fine-grained PAT, this repo only, Issues: Read & Write
 ```
 
-Never commit real values for these — `.env.example` only has placeholders.
-If `ANTHROPIC_API_KEY` or `AI_CHAT_KEY` is missing, the endpoint returns
-`not-configured` and the panel says so; the game itself is unaffected either
-way.
+It intentionally does not need:
 
-## What it can actually do (fixed tool list, server + client both validate)
+```bash
+ANTHROPIC_API_KEY
+AI_CHAT_KEY
+ANTHROPIC_MODEL
+```
 
-- `give_item` — add 1-10 of a whitelisted item id to the player's inventory
-- `heal` — restore health/hunger/thirst (1-100 each, only the fields given)
-- `give_coins` — add 1-500 coins
-- `set_time` — jump the in-game clock to any hour 0-24 (e.g. skip to night)
-- `teleport_safezone` — send the player back to the fenced safe zone
+Those were part of the earlier live-Claude/tool-call experiment and are no
+longer required for this route.
 
-Every action is re-validated and clamped client-side in
-`UI._applyAiAction()` even though the server already constrains the tool
-schema — defense in depth. The assistant cannot do anything outside this
-list: no arbitrary code execution, no reaching into other systems.
+## Files
 
-## Architecture
+- `src/ui.js` — renders the 🤖 chat panel and sends the message to `/api/aichat`.
+- `api/aichat.js` — creates a GitHub issue labeled `player-feedback`; no AI model
+  call and no live actions.
+- `api/feedback.js` — standard feedback form route, also creates GitHub issues
+  labeled `player-feedback`.
 
-- `src/ui.js` — `openAiChat()` / `_renderAiChat()` / `_sendAiChat()` /
-  `_applyAiAction()`. Chat history is in-memory only (component state, capped
-  at 20 turns), never written to localStorage/save data — nothing sent to the
-  assistant is retained after a page reload.
-- `api/aichat.js` — Vercel serverless function. Validates the passphrase and
-  rate limit (reuses `rateLimit()` from `api/_cloud.js`), then calls the
-  Anthropic Messages API with the tool schema above and returns
-  `{ reply, actions }` for the client to display/execute.
+## Scheduled-task fit
 
-## Cost/model notes
-
-Defaults to `claude-3-5-haiku-20241022` for low per-message cost; override
-with `ANTHROPIC_MODEL` if a different model is preferred. `max_tokens: 400`
-and history is capped to the last 8 turns / 400 chars each, so a runaway
-conversation can't blow up token usage. Rate limit is 20 requests/minute per
-IP (in-memory, resets on cold start — friction, not a hard wall, same
-trade-off as the existing cloud-save endpoints).
+Claude Cowork, Claude Code, Codex, or another local/subscription-based dev agent
+can later check GitHub issues with `player-feedback`, apply the owner's rules and
+context, then make actual game/repo changes from the computer workflow.
