@@ -8,6 +8,7 @@
 // _kill), or hordes (spawn several at one lootArea).
 // ============================================================
 import * as THREE from 'three';
+import { makeHumanoid } from './characters.js';
 import { resolveCollisions } from './collision.js';
 
 const POOL_SIZE = 12;
@@ -28,21 +29,13 @@ export class Enemies {
   }
 
   _makeZombie() {
-    const mat = c => new THREE.MeshLambertMaterial({ color: c });
-    const g = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 0.32), mat(0x5a6e4a)); body.position.y = 1.0;
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.34, 0.34), mat(0x8fa07a)); head.position.y = 1.62;
-    head.rotation.z = 0.15; // creepy tilt
-    const legL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.62, 0.2), mat(0x3a3a30)); legL.position.set(-0.15, 0.31, 0);
-    const legR = legL.clone(); legR.position.x = 0.15;
-    const armR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), mat(0x5a6e4a));
-    armR.position.set(0.36, 1.25, -0.25); armR.rotation.x = -1.35;   // arms-forward zombie pose
-    const armL = armR.clone(); armL.position.x = -0.36;
-    g.add(body, head, legL, legR, armR, armL);
+    // Shaped infected: hunched humanoid, arms reaching forward (characters.js).
+    const rig = makeHumanoid({ kind: 'infected', shirt: 0x5a6e4a, pants: 0x3a3a30, skin: 0x8fa07a });
+    const g = rig.group;
     g.visible = false;
     this.game.scene.add(g);
     return {
-      mesh: g, bodyMat: body.material,
+      mesh: g, bodyMat: rig.torso.material,
       pos: new THREE.Vector3(), home: new THREE.Vector3(), target: new THREE.Vector3(),
       hp: HP, alive: false, state: 'wander', wanderT: 0, atkT: 0, respawnT: 0, flashT: 0
     };

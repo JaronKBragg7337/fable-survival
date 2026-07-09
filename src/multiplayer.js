@@ -9,6 +9,8 @@
 // If realtime is unavailable, Fable Survival keeps running as singleplayer.
 // ============================================================
 import * as THREE from 'three';
+import { makeHumanoid } from './characters.js';
+import { makeCarMesh } from './carModel.js';
 
 const SUPA_URL = 'https://ygjpnvrwhkrowkrskftk.supabase.co';
 const SUPA_KEY = 'sb_publishable_Y-duV64ayMMEvVwMs5PWuw_6kvzbOrN';
@@ -468,27 +470,15 @@ function createRemote(scene, state) {
 }
 
 function buildSurvivor(colorHex, name) {
-  const g = new THREE.Group();
-  const mat = (c) => new THREE.MeshLambertMaterial({ color: c });
-  const shirt = new THREE.Color(colorHex || '#6fbf58');
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 0.32), new THREE.MeshLambertMaterial({ color: shirt }));
-  body.position.y = 1.0;
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.34, 0.34), mat(0xd9a066));
-  head.position.y = 1.6;
-  const legL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.62, 0.2), mat(0x2b2b33));
-  legL.position.set(-0.15, 0.31, 0);
-  const legR = legL.clone();
-  legR.position.x = 0.15;
-  const armR = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.6, 0.16), new THREE.MeshLambertMaterial({ color: shirt }));
-  armR.position.set(0.38, 1.05, 0);
-  const armL = armR.clone();
-  armL.position.x = -0.38;
+  // Shaped remote survivor (characters.js) — same rig as the local player.
+  const rig = makeHumanoid({ shirt: new THREE.Color(colorHex || '#6fbf58').getHex(), pants: 0x2b2b33, skin: 0xd9a066 });
+  const g = rig.group;
   const label = makeNameSprite(name);
   label.position.y = 2.05;
-  g.add(body, head, legL, legR, armR, armL, label);
-  g.userData.armR = armR;
-  g.userData.legL = legL;
-  g.userData.legR = legR;
+  g.add(label);
+  g.userData.armR = rig.armR;
+  g.userData.legL = rig.legL;
+  g.userData.legR = rig.legR;
   return g;
 }
 
@@ -499,25 +489,9 @@ function animateRemote(remote) {
 }
 
 function buildRemoteVehicle(colorHex) {
-  const g = new THREE.Group();
-  const color = new THREE.Color(colorHex || '#4fa3ff');
-  const mat = (c) => new THREE.MeshLambertMaterial({ color: c });
-  const body = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.9, 1.7), mat(color));
-  body.position.y = 0.75;
-  const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.7, 1.35), mat(0xd7e2ea));
-  cabin.position.set(-0.25, 1.55, 0);
-  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.18, 1.25), mat(0xf0d461));
-  nose.position.set(1.98, 1.03, 0);
-  const wheelGeo = new THREE.CylinderGeometry(0.36, 0.36, 0.24, 10);
-  const wheelMat = mat(0x1d2026);
-  for (const [x, y, z] of [[-1.15, 0.38, 0.88], [-1.15, 0.38, -0.88], [1.18, 0.38, 0.88], [1.18, 0.38, -0.88]]) {
-    const wheel = new THREE.Mesh(wheelGeo, wheelMat);
-    wheel.rotation.x = Math.PI / 2;
-    wheel.position.set(x, y, z);
-    g.add(wheel);
-  }
-  g.add(body, cabin, nose);
-  return g;
+  // Shaped remote car — same model as drivable cars (carModel.js).
+  const { group } = makeCarMesh(new THREE.Color(colorHex || '#4fa3ff').getHex());
+  return group;
 }
 
 function makeNameSprite(name) {

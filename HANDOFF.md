@@ -1,5 +1,36 @@
 # HANDOFF.md — Session Log
 
+## 2026-07-09 — Claude (Fable 5, Cowork) — Shaped characters, real car model, fixed barn roof
+
+**State:** working; vite build green (gzip ~157 KB). Synced to the Heartbeat
+mirror with the wrapper preserved.
+
+**Shipped (visual-direction brief):**
+- `src/characters.js` (new): shared shaped humanoid — capsule limbs, tapered
+  torso, sphere head + hair cap, shoulder-pivot arms so existing swing code
+  works untouched. Variants: survivor, infected (hunched, arms forward),
+  trader (hat + apron). Used by player.js, enemies.js, multiplayer.js
+  (remotes), world.js (trader). Box people are gone.
+- `src/carModel.js` (new): one shaped car — extruded side profile (hood/
+  windshield/roof/trunk in one connected hull), wheels with dark wells + hubs,
+  glass, bumpers, head/tail lights. Used by vehicles.js (drivable wrecks,
+  wheel-install order preserved) and multiplayer.js (remote cars).
+- Barn: gable roof that actually meets at the ridge, triangular gable ends on
+  the side walls, ridge beam, door trim + loft door. Abandoned house: pitched
+  shed roof on posts instead of a floating slab.
+
+**Verified:** `node --check` all touched files; `npm run build` clean; mirror
+page live-checked after deploy.
+
+**Next up:** Jaron feel-test; then tree/rock shaping pass (world.js cones) if
+the new character/car language should extend to nature props.
+
+**Gotchas:** wreck repair code uses `bodyMat` + `wheels[]` from makeCarMesh —
+keep that contract if you touch carModel.js. Character materials are per-rig
+(safe for hit-flash tinting).
+
+---
+
 ## 2026-07-08 — ChatGPT — Heartbeat mirror sync protocol added
 
 **State:** documentation/process update pushed to `fable-survival` only. This did

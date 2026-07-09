@@ -7,6 +7,7 @@
 // or add new structure builders like _house().
 // ============================================================
 import * as THREE from 'three';
+import { makeHumanoid } from './characters.js';
 import { rollLoot, ITEMS } from './items.js';
 
 function mulberry32(seed) {
@@ -142,12 +143,8 @@ export class World {
     s.add(hut);
     this.game.colliders.push({ x: -6, z: -6, r: 2.2 });
 
-    // trader NPC (simple figure)
-    const npc = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 0.3), this._mat(0xc9a227)); body.position.y = 1.0;
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.34, 0.34), this._mat(0xd9a066)); head.position.y = 1.6;
-    const hat = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.12, 0.42), this._mat(0x333333)); hat.position.y = 1.83;
-    npc.add(body, head, hat);
+    // trader NPC — shaped humanoid with hat + apron (characters.js)
+    const npc = makeHumanoid({ kind: 'trader', shirt: 0xc9a227, pants: 0x4a3a2a, skin: 0xd9a066 }).group;
     const nx = -4.2, nz = -4.2;
     npc.position.set(nx, 0, nz);
     npc.lookAt(0, 0, 0);
@@ -285,7 +282,17 @@ export class World {
     const back = new THREE.Mesh(new THREE.BoxGeometry(8, 2.6, 0.3), wallMat); back.position.set(0, 1.3, -2.85);
     const left = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.6, 6), wallMat); left.position.set(-3.85, 1.3, 0);
     const right = left.clone(); right.position.x = 3.85;
-    const roof = new THREE.Mesh(new THREE.BoxGeometry(8.6, 0.2, 6.6), roofMat); roof.position.y = 2.7;
+    // Single-slope shed roof: high at the open front, low at the back, with
+    // an overhang — reads as built, not as a floating lid.
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(8.6, 0.18, 7.1), roofMat);
+    const slope = Math.atan2(0.8, 6.6);
+    roof.rotation.x = slope; roof.position.set(0, 2.98, 0.15);
+    const beamM = this._mat(0x4a3a28);
+    for (const bx of [-3.6, 0, 3.6]) {
+      const beam = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.7, 0.16), beamM);
+      beam.position.set(bx, 2.95, 2.85);
+      g.add(beam);
+    }
     g.add(slab, back, left, right, roof);
     g.position.set(x, 0, z);
     s.add(g);
@@ -349,9 +356,34 @@ export class World {
     const right = left.clone(); right.position.x = 4.85;
     const frontL = new THREE.Mesh(new THREE.BoxGeometry(3.3, 3.4, 0.3), wall); frontL.position.set(-3.35, 1.7, 3.35);
     const frontR = frontL.clone(); frontR.position.x = 3.35;
-    const roofL = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.25, 4.4), roofMat); roofL.position.set(0, 4.05, -1.75); roofL.rotation.x = 0.5;
-    const roofR = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.25, 4.4), roofMat); roofR.position.set(0, 4.05, 1.75); roofR.rotation.x = -0.5;
-    g.add(slab, back, left, right, frontL, frontR, roofL, roofR);
+    // Gable roof, built to actually FIT: walls top out at y=3.4, half-span
+    // 3.5+0.4 overhang, rise 1.5. Panels meet at the ridge; triangular gable
+    // infills close the ends; a ridge beam caps the seam. No floating roof.
+    const half = 3.9, rise = 1.5, wallTop = 3.4;
+    const panelLen = Math.hypot(half, rise) + 0.15;
+    const pitch = Math.atan2(rise, half);
+    const roofL = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.18, panelLen), roofMat);
+    roofL.position.set(0, wallTop + rise / 2, -half / 2); roofL.rotation.x = pitch;
+    const roofR = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.18, panelLen), roofMat);
+    roofR.position.set(0, wallTop + rise / 2, half / 2); roofR.rotation.x = -pitch;
+    const ridge = new THREE.Mesh(new THREE.BoxGeometry(10.8, 0.22, 0.3), roofMat);
+    ridge.position.set(0, wallTop + rise, 0);
+    // Gable end triangles (front/back walls up to the ridge).
+    const gableShape = new THREE.Shape();
+    gableShape.moveTo(-3.5, 0); gableShape.lineTo(3.5, 0); gableShape.lineTo(0, rise); gableShape.closePath();
+    const gableGeo = new THREE.ExtrudeGeometry(gableShape, { depth: 0.28, bevelEnabled: false });
+    // Ridge runs along X, so the triangular ends sit on the x=±5 side walls,
+    // spanning the barn depth (shape x -> world z via 90° yaw).
+    const gableL = new THREE.Mesh(gableGeo, wall);
+    gableL.rotation.y = Math.PI / 2; gableL.position.set(-5.0 + 0.01, wallTop, 0 - 0.14);
+    const gableR = new THREE.Mesh(gableGeo, wall);
+    gableR.rotation.y = Math.PI / 2; gableR.position.set(5.0 - 0.29, wallTop, 0 - 0.14);
+    // Big barn door trim on the open front + hay loft door in the gable.
+    const trim = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.25, 0.35), this._mat(0xd9d2c0));
+    trim.position.set(0, 3.32, 3.4);
+    const loft = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.9, 0.1), this._mat(0x5a3a26));
+    loft.position.set(0, 2.8, 3.42);
+    g.add(slab, back, left, right, frontL, frontR, roofL, roofR, ridge, gableL, gableR, trim, loft);
     g.position.set(x, 0, z); s.add(g);
     this.game.colliders.push(
       { box: true, x, z: z - 3.35, hx: 5, hz: 0.3 },

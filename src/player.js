@@ -6,6 +6,7 @@
 // To expand: swap in a physics lib, or add crouch/prone states.
 // ============================================================
 import * as THREE from 'three';
+import { makeHumanoid } from './characters.js';
 import { resolveCollisions } from './collision.js';
 
 const WALK = 4.0, SPRINT = 6.6, GRAVITY = 22, JUMP_V = 7.5, RADIUS = 0.45;
@@ -24,20 +25,14 @@ export class Player {
     game.scene.add(this.mesh);
   }
 
-  // Low-poly "survivor": box body, head, arms. No skeletal animation -
+  // Low-poly "survivor": shaped humanoid (characters.js). No skeletal rig -
   // we bob and swing procedurally to stay cheap on phones.
   _buildMesh() {
-    const g = new THREE.Group();
-    const mat = c => new THREE.MeshLambertMaterial({ color: c });
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 0.32), mat(0x3f5e3a)); body.position.y = 1.0;
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.34, 0.34), mat(0xd9a066)); head.position.y = 1.6;
-    const legL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.62, 0.2), mat(0x2b2b33)); legL.position.set(-0.15, 0.31, 0);
-    const legR = legL.clone(); legR.position.x = 0.15;
-    this.armR = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.6, 0.16), mat(0x3f5e3a));
-    this.armR.position.set(0.38, 1.05, 0);
-    const armL = this.armR.clone(); armL.position.x = -0.38;
-    g.add(body, head, legL, legR, this.armR, armL);
-    return g;
+    // Shaped survivor from the shared humanoid builder (characters.js).
+    // armR pivots at the shoulder, so the existing swing code just works.
+    const rig = makeHumanoid({ shirt: 0x3f5e3a, pants: 0x2b2b33, skin: 0xd9a066 });
+    this.armR = rig.armR;
+    return rig.group;
   }
 
   update(dt) {

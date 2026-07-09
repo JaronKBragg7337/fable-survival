@@ -7,6 +7,7 @@
 // can't catch a moving car, but the car can't attack or gather.
 // ============================================================
 import * as THREE from 'three';
+import { makeCarMesh } from './carModel.js';
 import { ITEMS } from './items.js';
 
 const REQUIRED = { fuel: 1, battery: 1, wheel: 2 };
@@ -25,29 +26,17 @@ export class Vehicles {
   }
 
   _wreck(id, x, z, rotY) {
-    const mat = c => new THREE.MeshLambertMaterial({ color: c });
-    const g = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.9, 1.7), mat(0x8a4a3a)); body.position.y = 0.75;
-    const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.7, 1.5), mat(0x6a3a30)); cabin.position.set(-0.2, 1.55, 0);
-    g.add(body, cabin);
-    // 3 wheels present, front-right missing (added when you install one)
-    const wheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.25, 8);
-    const wheelMat = mat(0x222222);
-    const wheelSpots = [[-1.2, 0.38, 0.85], [-1.2, 0.38, -0.85], [1.2, 0.38, -0.85], [1.2, 0.38, 0.85]];
-    const wheels = wheelSpots.map(([wx, wy, wz], i) => {
-      const w = new THREE.Mesh(wheelGeo, wheelMat);
-      w.rotation.x = Math.PI / 2; w.position.set(wx, wy, wz);
-      w.visible = i < 2; // two wheels missing -> matches REQUIRED.wheel = 2
-      g.add(w);
-      return w;
-    });
+    // Shaped car from the shared model (carModel.js) — a real silhouette,
+    // shown battered here: rusty paint until repaired, two wheels missing.
+    const { group: g, bodyMat, wheels } = makeCarMesh(0x8a4a3a);
+    wheels.forEach((w, i) => { w.visible = i < 2; }); // matches REQUIRED.wheel = 2
     g.position.set(x, 0, z); g.rotation.y = rotY;
     // wreck sits tilted because of the missing wheels
     g.rotation.z = 0.045;
     this.game.scene.add(g);
     this.game.colliders.push({ box: true, x, z, hx: 1.9, hz: 1.4 });
 
-    const v = { id, x, z, mesh: g, bodyMat: body.material, wheels, installed: { fuel: 0, battery: 0, wheel: 0 }, repaired: false, driving: false };
+    const v = { id, x, z, mesh: g, bodyMat, wheels, installed: { fuel: 0, battery: 0, wheel: 0 }, repaired: false, driving: false };
     this.list.push(v);
     this.game.interactables.push({
       x, z, r: 2.8,
